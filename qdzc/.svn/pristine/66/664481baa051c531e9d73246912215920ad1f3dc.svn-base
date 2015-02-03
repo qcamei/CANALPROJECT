@@ -1,0 +1,176 @@
+<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>营业终端IT支撑平台</title>
+    
+	<link href="./images/skin.css" rel="stylesheet" type="text/css" />
+	<link href="./LigerUI/ligerUI/skins/Aqua/css/ligerui-all.css" rel="stylesheet" type="text/css" />
+    <link href="./LigerUI/ligerUI/skins/ligerui-icons.css" rel="stylesheet" type="text/css" />
+    <link href="./images/search.css" rel="stylesheet" type="text/css" />
+    <script src="./LigerUI/jquery/jquery-1.3.2.min.js" type="text/javascript"></script> 
+    <script src="./LigerUI/ligerUI/js/core/base.js" type="text/javascript"></script> 
+    <script src="./LigerUI/ligerUI/js/plugins/ligerGrid.js" type="text/javascript"></script>
+    <script src="./LigerUI/ligerUI/js/plugins/ligerToolBar.js" type="text/javascript"></script>
+    <script src="./LigerUI/ligerUI/js/plugins/ligerResizable.js" type="text/javascript"></script>
+    <script src="./LigerUI/ligerUI/js/plugins/ligerCheckBox.js" type="text/javascript"></script>
+    <script src="./LigerUI/ligerUI/js/plugins/ligerDialog.js" type="text/javascript"></script>
+    
+    <script type="text/javascript">
+        var grid = null;
+        var manager = null;
+        $(function ()
+        {   
+        
+        	$("#toptoolbar").ligerToolBar({
+        		items: [
+                	{ id : 'add' ,   text: '增加角色', click: itemclick, icon: 'add'},
+	                { id : 'modify', text: '修改角色', click: itemclick, icon: 'modify' },
+	                { id : 'delete', text: '删除角色', click: itemclick, icon: 'delete' }
+	               ]
+        	});
+        	  
+         //列表结构
+         grid =      
+            $("#maingrid").ligerGrid({
+                height:'100%',
+                columns: [ 
+	                { display: '角色编号', name: 'roalId', width: 200},
+	                { display: '角色名', name: 'roalName', width: 200 },
+	                { display: '角色描述', name: 'roalDesc', width: 300 } ],  
+                dataAction:'server',
+                url: 'roalListQuery',
+           //   where : f_getWhere(),
+             	sortName : 'roalId',
+                pageSize:15 ,
+                rownumbers:true,
+                checkbox : true
+                
+            });//列表结束。
+            $("#pageloading").hide(); 
+	        
+	         function itemclick(item)
+        {
+           switch(item.id){
+           		case "modify":
+           			f_modify();          			
+           			break;
+           		case "delete":
+           			f_delete() ;    
+           			break;
+           		case "add":   
+           			f_add();
+           			break;
+           }
+        }
+	         
+       function f_delete()
+       {
+           manager= $("#maingrid").ligerGetGridManager();
+            if(!manager) {
+            		$.ligerDialog.error('请查询角色清单后,选中条目,再删除！');
+            		return;
+            } else {
+            	var row = manager.getSelectedRows();
+            	var urlAddress = "roalDelete?roalId=";
+            	if (row.length==0) {
+            		$.ligerDialog.error('请选择删除对象！'); 
+            		return ;  
+            	}else{
+ 	            	$.ligerDialog.confirm("确认要删除该角色吗?",function(yes){
+ 	            		 if(yes){ 	            			 
+		            		 for(var i=0;i<row.length;i++){
+		            			urlAddress+=row[i].roalId;
+		            			urlAddress+=",";
+		            		}
+ 	            			 
+ 	            			 var xmlhttp = getXMLHttpRequest();
+ 	            			 xmlhttp.open("POST",urlAddress,true);
+ 	            			 xmlhttp.send();
+ 	            			  $.ligerDialog.waitting("删除中，请稍后");
+ 	            			 xmlhttp.onreadystatechange=function(){
+ 	            			 	if(xmlhttp.readyState ==4 && xmlhttp.status == 200){
+ 	            			 		var responseContext = xmlhttp.responseText;
+ 	            			 		if(responseContext == 'success'){
+ 	            			 			manager.deleteSelectedRow();
+ 	            			 			 $.ligerDialog.closeWaitting();
+ 	            			 			$.ligerDialog.success("删除成功");
+ 	            			 		}else{
+ 	            			 			 $.ligerDialog.closeWaitting();
+											$.ligerDialog.error("删除失败，请联系管理员...");
+										}
+								}
+							}
+						}
+ 	            	});
+                }          	       
+		     }
+       	}
+	         
+          function f_modify()
+        {   
+            manager = $("#maingrid").ligerGetGridManager();
+            if(!manager){
+            	$.ligerDialog.error('请查询清单后,选中条目,再修改！')
+            	return;
+            }else{
+            	var row = manager.getSelectedRows();
+            	if(row.length == 0){
+            		$.ligerDialog.error("请选择需要更新的角色");
+            		return;
+            	}else if(row.length > 1){
+            		$.ligerDialog.error("只能选择一项进行修改");
+            		return;
+            	}else{
+            		var url = "roalModify?roalId="+row[0].roalId;
+            		//top.f_addTab("roalModify","角色修改",'systemManager/roleModify.jsp');
+            		top.f_addTab("roalModify","角色修改",url);
+            		//alert("OK");
+            	}
+            }
+        }
+
+	         
+        function f_add(){
+            top.f_addTab('roalAdd','新增角色','roalAdd');
+        }
+    
+      }); // $(function ()结束。
+       
+        function getXMLHttpRequest(){
+  		  var xmlhttp ;
+		  if (window.XMLHttpRequest){		// code for IE7+, Firefox, Chrome, Opera, Safari
+  		  	xmlhttp=new XMLHttpRequest();
+  		  }else{							// code for IE6, IE5
+  			xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  		  }
+		  return xmlhttp;
+  	   }
+        
+		function reload(){
+			history.go(0) ;
+		}
+    </script>
+  </head>
+ 
+<body style="padding:6px; overflow:hidden; background-color: #F7F8F9; ">
+ <table width="100%" id="result">
+    <tr ><td colspan="2" height="1" bgcolor="#BBD2E9" ></td></tr>
+	<tr><td colspan="2" height="5"></td></tr>
+	<tr><td class="blackbold_b"><img src="./images/arrow6.gif" hspace="5">角色列表</td></tr>	    
+</table>
+<div id="toptoolbar"></div>
+ <div class="l-clear"></div> 
+    <div id="maingrid"></div>
+  <div style="display:none;">
+</div>
+    
+
+</body>
+</html>

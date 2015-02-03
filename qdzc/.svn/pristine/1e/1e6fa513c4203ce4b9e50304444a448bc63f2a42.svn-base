@@ -1,0 +1,120 @@
+package com.cqupt.canalManage.action;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.log4j.Logger;
+import org.apache.struts2.ServletActionContext;
+
+import com.cqupt.pub.dao.DataStormSession;
+import com.cqupt.pub.exception.CquptException;
+import com.opensymphony.xwork2.ActionSupport;
+
+public class AgentModifyQueryAction extends ActionSupport {
+	Logger logger = Logger.getLogger(getClass());
+	private static final long serialVersionUID = 1L;
+	HttpServletRequest request = null;
+
+	public String execute() {
+		logger.info("AgentModifyQueryAction:)");
+		request = ServletActionContext.getRequest();
+		String inId = request.getParameter("inId");
+
+		DataStormSession session = null;
+		try {
+			session = DataStormSession.getInstance();
+
+			String sql = "SELECT * FROM canal_infomation WHERE in_id=" + inId;
+			Map resultMap1 = session.findSql(sql).get(0);
+			inId = resultMap1.get("agentInId").toString();
+
+			sql = "select * from agent_information where in_id ='"
+					+ inId + "'";
+			logger.info("查询要修改型号的详细信息" + sql);
+			logger.info("inId_QueryAction: " + inId);
+			List<Map<String, Object>> resultList = session.findSql(sql);
+			Map<String, Object> resultMap = (Map<String, Object>) resultList
+					.get(0);
+			// 命名自动更换模式
+			request.setAttribute("inId", resultMap.get("inId"));
+			request.setAttribute("branchCompany",
+					resultMap.get("branchCompany"));
+			request.setAttribute("areaName", resultMap.get("areaName"));
+			request.setAttribute("agentId", resultMap.get("agentId"));
+			request.setAttribute("agentName", resultMap.get("agentName"));
+			request.setAttribute("agentShortName",
+					resultMap.get("agentShortName"));
+			request.setAttribute("agentState", resultMap.get("agentState"));
+			request.setAttribute("agentDept", resultMap.get("agentDept"));
+
+			request.setAttribute("agentLevel", resultMap.get("agentLevel"));
+			request.setAttribute("companyType", resultMap.get("companyType"));
+			request.setAttribute("cooperationType",
+					resultMap.get("cooperationType"));
+			request.setAttribute("legalPerson", resultMap.get("legalPerson"));
+			request.setAttribute("legalPhone", resultMap.get("legalPhone"));
+			request.setAttribute("legalCardType",
+					resultMap.get("legalCardType"));
+			request.setAttribute("legalIdCard", resultMap.get("legalIdCard"));
+
+			request.setAttribute("manageModel", resultMap.get("manageModel"));
+			request.setAttribute("is11888Card", resultMap.get("is11888Card"));
+			request.setAttribute("ondutyPerson", resultMap.get("ondutyPerson"));
+			request.setAttribute("ondutyPersonPhone",
+					resultMap.get("ondutyPersonPhone"));
+			request.setAttribute("startBank", resultMap.get("startBank"));
+			request.setAttribute("bankAccountid",
+					resultMap.get("bankAccountid"));
+			request.setAttribute("parentId", resultMap.get("parentId"));
+
+			request.setAttribute("parentName", resultMap.get("parentName"));
+			request.setAttribute("companyAddress",
+					resultMap.get("companyAddress"));
+			request.setAttribute("ondutyPersonAddress",
+					resultMap.get("ondutyPersonAddress"));
+			request.setAttribute("ondutyPersonQqnum",
+					resultMap.get("ondutyPersonQqnum"));
+			request.setAttribute("postCode", resultMap.get("postCode"));
+			request.setAttribute("agentFax", resultMap.get("agentFax"));
+			request.setAttribute("agentEmail", resultMap.get("agentEmail"));
+
+			request.setAttribute("payWay", resultMap.get("payWay"));
+			request.setAttribute("bankAccountName",
+					resultMap.get("bankAccountName"));
+			request.setAttribute("weituoStartBank",
+					resultMap.get("weituoStartBank"));
+			request.setAttribute("weituoBankAccount",
+					resultMap.get("weituoBankAccount"));
+			request.setAttribute("weituoBankName",
+					resultMap.get("weituoBankName"));
+			request.setAttribute("payObject", resultMap.get("payObject"));
+			request.setAttribute("registerMoney",
+					resultMap.get("registerMoney"));
+			request.setAttribute("registerDate", resultMap.get("registerDate"));
+			request.setAttribute("businessLicenseId",
+					resultMap.get("businessLicenseId"));
+
+			request.setAttribute("taxRegisteId", resultMap.get("taxRegisteId"));
+			request.setAttribute("bankPermisionId",
+					resultMap.get("bankPermisionId"));
+			request.setAttribute("organizationCodeId",
+					resultMap.get("organizationCodeId"));
+			request.setAttribute("operUser", resultMap.get("operUser"));
+			request.setAttribute("deptName", resultMap.get("deptName"));
+			request.setAttribute("remark", resultMap.get("remark"));
+
+			session.closeSession();
+		} catch (Exception e) {
+			try {
+				session.exceptionCloseSession();
+			} catch (CquptException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+		}
+
+		return "success";
+	}
+}

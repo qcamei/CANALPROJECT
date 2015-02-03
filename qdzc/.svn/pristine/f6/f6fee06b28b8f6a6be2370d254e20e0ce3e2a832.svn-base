@@ -1,0 +1,178 @@
+package com.cqupt.canalManage.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
+import org.apache.struts2.ServletActionContext;
+
+import com.cqupt.pub.dao.DataStormSession;
+import com.cqupt.pub.exception.CquptException;
+import com.cqupt.pub.util.Md;
+import com.opensymphony.xwork2.ActionSupport;
+
+public class CanalUserModifyAction extends ActionSupport {
+
+	private static final long serialVersionUID = -6941574699319426537L;
+	Logger logger = Logger.getLogger(getClass());
+	HttpServletRequest request = null;
+	private Md md5fun = new Md();
+
+	public String execute() {
+
+		this.request = ServletActionContext.getRequest();
+		String deptId = request.getSession().getAttribute("deptId").toString();
+		String deptName = request.getSession().getAttribute("deptName")
+				.toString();
+		String operUser = request.getSession().getAttribute("userName")
+				.toString();
+
+		try {
+			String inId = java.net.URLDecoder.decode(
+					request.getParameter("inId"), "UTF-8");
+
+			String userName = java.net.URLDecoder.decode(
+					request.getParameter("userName"), "UTF-8");
+			String userKind = java.net.URLDecoder.decode(
+					request.getParameter("userKind"), "UTF-8");
+
+			String userState = java.net.URLDecoder.decode(
+					request.getParameter("userState"), "UTF-8");
+			String canalName = java.net.URLDecoder.decode(
+					request.getParameter("canalName"), "UTF-8");
+			String userAgent = java.net.URLDecoder.decode(
+					request.getParameter("userAgent"), "UTF-8");
+			String userAuthority = java.net.URLDecoder.decode(
+					request.getParameter("userAuthority"), "UTF-8");
+			String userIdCard = java.net.URLDecoder.decode(
+					request.getParameter("userIdCard"), "UTF-8");
+
+			String userPinyin = java.net.URLDecoder.decode(
+					request.getParameter("userPinyin"), "UTF-8");
+			String userDept = java.net.URLDecoder.decode(
+					request.getParameter("userDept"), "UTF-8");
+			String userEmail = java.net.URLDecoder.decode(
+					request.getParameter("userEmail"), "UTF-8");
+			String userRole = java.net.URLDecoder.decode(
+					request.getParameter("userRole"), "UTF-8");
+			String userCountId = java.net.URLDecoder.decode(
+					request.getParameter("userCountId"), "UTF-8");
+			String userSex = java.net.URLDecoder.decode(
+					request.getParameter("userSex"), "UTF-8");
+			String userBirthday = java.net.URLDecoder.decode(
+					request.getParameter("userBirthday"), "UTF-8");
+			String userNativeplace = java.net.URLDecoder.decode(
+					request.getParameter("userNativeplace"), "UTF-8");
+			String userPhone = java.net.URLDecoder.decode(
+					request.getParameter("userPhone"), "UTF-8");
+
+			String userEducation = java.net.URLDecoder.decode(
+					request.getParameter("userEducation"), "UTF-8");
+			String userCertification = java.net.URLDecoder.decode(
+					request.getParameter("userCertification"), "UTF-8");
+			String userInDate = java.net.URLDecoder.decode(
+					request.getParameter("userInDate"), "UTF-8");
+			String userOutDate = java.net.URLDecoder.decode(
+					request.getParameter("userOutDate"), "UTF-8");
+			String userAddress = java.net.URLDecoder.decode(
+					request.getParameter("userAddress"), "UTF-8");
+			String userPosition = java.net.URLDecoder.decode(
+					request.getParameter("userPosition"), "UTF-8");
+			String userWay = java.net.URLDecoder.decode(
+					request.getParameter("userWay"), "UTF-8");
+			String userRegionName = java.net.URLDecoder.decode(
+					request.getParameter("userRegionName"), "UTF-8");
+			String remark = java.net.URLDecoder.decode(
+					request.getParameter("remark"), "UTF-8");
+
+			HttpServletResponse response = ServletActionContext.getResponse();
+
+			response.setCharacterEncoding("UTF-8");
+			PrintWriter out;
+			out = response.getWriter();
+			out.print(modifyUserInfo(inId, userName, userKind, userState,
+					canalName, userAgent, userAuthority, userIdCard,
+					userPinyin, userDept, userEmail, userRole, userCountId,
+					userSex, userBirthday, userNativeplace, userPhone,
+					userEducation, userCertification, userInDate, userOutDate,
+					userAddress, userPosition, userWay, userRegionName,
+					operUser, deptName, remark));
+			out.flush();
+			out.close();
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+
+	}
+
+	private String modifyUserInfo(String inId, String userName,
+			String userKind, String userState, String canalName,
+			String userAgent, String userAuthority, String userIdCard,
+			String userPinyin, String userDept, String userEmail,
+			String userRole, String userCountId, String userSex,
+			String userBirthday, String userNativeplace, String userPhone,
+			String userEducation, String userCertification, String userInDate,
+			String userOutDate, String userAddress, String userPosition,
+			String userWay, String userRegionName, String operUser,
+			String deptName, String remark) {
+		DataStormSession session = null;
+		String resultStr = "";
+		String sql = "";
+
+		// Date now = new Date();
+		// logger.info(now);
+		// SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		// // HH表示24小时制
+		// // 如果换成hh表示12小时制
+		// String operTime = sdf.format(now);
+		// logger.info(operTime);
+
+		try {
+			session = DataStormSession.getInstance();
+			sql = "update canal_user set user_name='" + userName
+					+ "',user_kind='" + userKind + "',user_state='" + userState
+					+ "',canal_name='" + canalName + "',user_agent='"
+					+ userAgent + "',user_authority='" + userAuthority
+					+ "',user_id_card='" + userIdCard + "',user_pinyin='"
+					+ userPinyin + "',user_dept='" + userDept
+					+ "',user_email='" + userEmail + "',user_role='" + userRole
+					+ "',user_count_id='" + userCountId + "',user_sex='"
+					+ userSex + "',user_birthday='" + userBirthday
+					+ "',user_nativeplace='" + userNativeplace
+					+ "',user_phone='" + userPhone + "',user_education='"
+					+ userEducation + "',user_certification='"
+					+ userCertification + "',user_in_date='" + userInDate
+					+ "',user_out_date='" + userOutDate + "',user_address='"
+					+ userAddress + "',user_position='" + userPosition
+					+ "',user_way='" + userWay + "',user_region_name='"
+					+ userRegionName + "',oper_user='" + operUser
+					+ "',dept_name='" + deptName
+					+ "',oper_time=sysdate(),remark='" + remark
+					+ "' where canal_in_id=" + inId;
+			logger.info("添加用户：" + sql);
+			session.update(sql);
+
+			resultStr = "success";
+			session.closeSession();
+		} catch (Exception e) {
+			resultStr = "error";
+			try {
+				session.exceptionCloseSession();
+			} catch (CquptException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+
+		}
+		return resultStr;
+
+	}
+}

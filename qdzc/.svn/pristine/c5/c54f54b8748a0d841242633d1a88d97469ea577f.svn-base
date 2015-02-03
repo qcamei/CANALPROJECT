@@ -1,0 +1,89 @@
+package com.cqupt.canalManage.action;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.log4j.Logger;
+import org.apache.struts2.ServletActionContext;
+
+import com.cqupt.pub.dao.DataStormSession;
+import com.cqupt.pub.exception.CquptException;
+import com.opensymphony.xwork2.ActionSupport;
+
+public class CanalUserModifyQueryAction extends ActionSupport {
+	Logger logger = Logger.getLogger(getClass());
+	private static final long serialVersionUID = 1L;
+	HttpServletRequest request = null;
+
+	public String execute() {
+		logger.info("CanalUserModifyQueryAction:)");
+		request = ServletActionContext.getRequest();
+		String inId = request.getParameter("inId");
+
+		DataStormSession session = null;
+		try {
+			session = DataStormSession.getInstance();
+			String sql = "select * from canal_user where canal_in_id ='" + inId
+					+ "'";
+			logger.info("查询要修改型号的详细信息" + sql);
+			logger.info("inId_QueryAction: " + inId);
+			List<Map<String, Object>> resultList = session.findSql(sql);
+			Map<String, Object> resultMap = (Map<String, Object>) resultList
+					.get(0);
+			// 命名自动更换模式
+			request.setAttribute("inId", resultMap.get("inId"));
+
+			request.setAttribute("userName", resultMap.get("userName"));
+			request.setAttribute("userKind", resultMap.get("userKind"));
+
+			request.setAttribute("userState", resultMap.get("userState"));
+			request.setAttribute("canalName", resultMap.get("canalName"));
+			request.setAttribute("userAgent", resultMap.get("userAgent"));
+
+			request.setAttribute("userAuthority",
+					resultMap.get("userAuthority"));
+			request.setAttribute("userIdCard", resultMap.get("userIdCard"));
+			request.setAttribute("userPinyin", resultMap.get("userPinyin"));
+			request.setAttribute("userDept", resultMap.get("userDept"));
+			request.setAttribute("userEmail", resultMap.get("userEmail"));
+			request.setAttribute("userRole", resultMap.get("userRole"));
+			request.setAttribute("userCountId", resultMap.get("userCountId"));
+
+			request.setAttribute("userSex", resultMap.get("userSex"));
+			request.setAttribute("userBirthday", resultMap.get("userBirthday"));
+			request.setAttribute("userNativeplace",
+					resultMap.get("userNativeplace"));
+			request.setAttribute("userPhone", resultMap.get("userPhone"));
+			request.setAttribute("userEducation",
+					resultMap.get("userEducation"));
+			request.setAttribute("userCertification",
+					resultMap.get("userCertification"));
+			request.setAttribute("userInDate", resultMap.get("userInDate"));
+
+			request.setAttribute("userOutDate", resultMap.get("userOutDate"));
+			request.setAttribute("userAddress", resultMap.get("userAddress"));
+			request.setAttribute("userPosition", resultMap.get("userPosition"));
+			request.setAttribute("userWay", resultMap.get("userWay"));
+			request.setAttribute("userRegionName",
+					resultMap.get("userRegionName"));
+			request.setAttribute("operUser", resultMap.get("operUser"));
+			request.setAttribute("deptName", resultMap.get("deptName"));
+			request.setAttribute("deptId", resultMap.get("deptId"));
+			request.setAttribute("operTime", resultMap.get("operTime"));
+			request.setAttribute("remark", resultMap.get("remark"));
+
+			session.closeSession();
+		} catch (Exception e) {
+			try {
+				session.exceptionCloseSession();
+			} catch (CquptException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+		}
+
+		return "success";
+	}
+}

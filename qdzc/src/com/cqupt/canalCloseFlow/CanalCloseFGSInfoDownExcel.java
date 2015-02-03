@@ -1,0 +1,180 @@
+package com.cqupt.canalCloseFlow;
+
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
+import org.apache.struts2.ServletActionContext;
+
+import com.cqupt.pub.dao.DataStormSession;
+import com.cqupt.pub.exception.CquptException;
+import com.cqupt.pub.util.DecodeUtils;
+import com.cqupt.pub.util.ExcelServiceImpl;
+import com.cqupt.pub.util.IExcelService;
+import com.opensymphony.xwork2.ActionSupport;
+
+public class CanalCloseFGSInfoDownExcel extends ActionSupport {
+	private static final long serialVersionUID = 1L;
+	Logger logger = Logger.getLogger(getClass());
+	InputStream excelStream;
+	HttpServletRequest request = null;
+	HttpServletResponse response = null;
+
+	public InputStream getExcelStream() {
+		return excelStream;
+	}
+
+	public void setExcelStream(InputStream excelStream) {
+		this.excelStream = excelStream;
+	}
+
+	public String execute() {
+		String resultStr = "";
+		String sql = "";
+		DataStormSession session = null;
+		request = ServletActionContext.getRequest();
+		response = ServletActionContext.getResponse();
+		response.setCharacterEncoding("utf-8");
+
+		// txtBeginDate,txtEndDate,closeId,userName,
+		// canalName,canalId,nextStepVal
+		try {
+			String closeId = DecodeUtils.decodeRequestString(request
+					.getParameter("closeId"));
+			String canalName = DecodeUtils.decodeRequestString(request
+					.getParameter("canalName"));
+			String canalId = DecodeUtils.decodeRequestString(request
+					.getParameter("canalId"));
+			String userName = DecodeUtils.decodeRequestString(request
+					.getParameter("userName"));
+			String nextStepVal = DecodeUtils.decodeRequestString(request
+					.getParameter("nextStepVal"));
+			String dataAuthId = request.getSession().getAttribute("dataAuthId")
+					.toString();
+			String txtBeginDate = DecodeUtils.decodeRequestString(
+					request.getParameter("txtBeginDate"), "全部", "");
+			String txtEndDate = DecodeUtils.decodeRequestString(
+					request.getParameter("txtEndDate"), "全部", "");
+
+			session = DataStormSession.getInstance();
+			String fileName = "渠道导出列表.xls";
+			try {
+				fileName = URLEncoder.encode(fileName, "UTF-8");
+				response.setHeader("Content-Disposition",
+						"attachment;fileName=" + fileName);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			IExcelService es = new ExcelServiceImpl();
+
+			String type = request.getParameter("type");
+			if (type.equals("fgs")) {
+				type = "分公司审核";
+			}
+			if (type.equals("fgbm")) {
+				type = "分管部门审核";
+			}
+			if (type.equals("crm")) {
+				type = "关闭CRM工号";
+			}
+			if (type.equals("dlsgl")) {
+				type = "代理商管理系统";
+			}
+			if (type.equals("qdgs")) {
+				type = "渠道归属";
+			}
+			if (type.equals("scw")) {
+				type = "删除代理商网站工号";
+			}
+			if (type.equals("zjjh")) {
+				type = "资金稽核系统配置";
+			}
+			if (type.equals("zxsl")) {
+				type = "专线受理环节";
+			}
+			if (type.equals("jcpz")) {
+				type = "渠道基础配置";
+			}
+			if (type.equals("jhxt")) {
+				type = "业务稽核系统配置";
+			}
+			if (type.equals("cwsh")) {
+				type = "财务审核";
+			}
+
+			if (nextStepVal.equals("")) {
+				nextStepVal = type;
+			} else if (nextStepVal.equals("全部")) {
+				nextStepVal = "";
+			}
+
+			String[] title = { "序号", "工单号", "操作人员", "审核部门", "部门编码", "当前步骤",
+					"当前状态", "下一步骤", "渠道编码", "渠道名称", "操作时间", "申请原因" };// excel工作表的标题
+			String[] keys = { "rownum", "closeId", "userName", "deptName",
+					"deptId", "currentStepVal", "auditState", "nextStepVal",
+					"canalId", "canalName", "operTime", "refuseReason" };
+
+			sql = "SELECT 	@rownum :=@rownum + 1 AS rownum,t.* from (select @rownum:=0) r,(select t.*,c.close_id ,c.user_name , c.dept_name ,c.dept_id,c.audit_state,"
+					+ "date_format(c.oper_time,'%Y-%m-%d %H:%i:%s') check_time,c.refuse_reason,c.money,c.bmoney from "
+					+ " (select t.*,a.step_val next_step_val,a.pre_step_val current_step_val from"
+					+ " ( SELECT a.in_id,a.canal_id,a.canal_name,a.area_name,a.canal_state,a.canal_form,"
+					+ "a.canal_property,a.canal_type,a.canal_parent_name,a.agent_name,a.canal_user_name,"
+					+ "a.canal_user_phone,a.canal_manager,a.urban_idetity,"
+					+ "date_format(a.oper_time,'%Y-%m-%d %H:%i:%s') oper_time,b.current_step,b.is_back"
+					+ " FROM qdzc.canal_infomation a RIGHT join qdzc.canal_step_state_close b on a.in_id=b.in_id "
+					+ " where a.dept_id in (" + dataAuthId + ")";
+
+			if (!canalName.equals("")) {
+				sql += " and a.canal_name like '%" + canalName + "%' ";
+			}
+			if (canalId != null && !canalId.equals("")) {
+				sql += " and  a.canal_id like '%" + canalId + "%'";
+			}
+			sql += " ORDER BY a.in_id DESC) as t  left join"
+					+ " (select b.*,a.step_key pre_step_key,a.step_val pre_step_val from qdzc.step_info_close a left join qdzc.step_info_close b on a.step_no = b.pre_step_no) a"
+					+ " on t.current_step = a.pre_step_no) t "
+					+ " left join qdzc.canal_infomation_close c on t.in_id=c.in_id ";
+			if (nextStepVal.equals("")) {
+				sql += " and t.next_step_val = c.next_step_val";
+			}
+			sql += " where  c.audit_state!='取消关闭' and c.audit_state!='驳回' ";
+			if (!txtBeginDate.equals("")) {
+				sql += " and c.oper_time>'" + txtBeginDate + " 00:00:00' ";
+			}
+			if (!txtEndDate.equals("")) {
+				sql += "  and c.oper_time<'" + txtEndDate + " 23:59:59' ";
+			}
+			if (!nextStepVal.equals("")) {
+				sql += " and t.next_step_val='" + nextStepVal
+						+ "' and (c.next_step_val='" + nextStepVal
+						+ "' or c.next_step_val is null)";
+			}
+			if (closeId != null && !closeId.equals("")) {
+				sql += " and c.close_id like '%" + closeId + "%'";
+			}
+			if (userName != null && !userName.equals("")) {
+				sql += " and  c.user_name like '%" + userName + "%'";
+			}
+			sql += " ) t";
+			logger.info("渠道列表导出excel：" + sql);
+
+			excelStream = es.getExcelInputStream(title, keys, sql);
+			resultStr = "excel";
+		} catch (CquptException ce) {
+			ce.printStackTrace();
+		} finally {
+			if (session != null) {
+				try {
+					session.closeSession();
+				} catch (CquptException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return resultStr;
+	}
+}

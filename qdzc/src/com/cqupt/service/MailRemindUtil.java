@@ -1,0 +1,847 @@
+package com.cqupt.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.cqupt.pub.dao.DataStormSession;
+import com.cqupt.pub.exception.CquptException;
+import com.cqupt.pub.util.MailUtil;
+
+public class MailRemindUtil {
+
+	// 客户经理，查询被驳回的工单，提醒客户经理修改处理
+	public static void mailSQ(String canalName) {
+		DataStormSession session = null;
+		String sql = "";
+		List list1 = null;
+		Map map1 = null;
+		List list2 = null;
+		Map map2 = null;
+		String operUser = "";
+		String addTotal = "", hisTotal = "", closeTotal = "";
+		String userEmail = "", userName = "";
+		String content = "";
+		try {
+			session = DataStormSession.getInstance();
+
+			sql = "select a.* ,ifnull(b.close_total,0) close_total from"
+					+ " (select a.oper_user,a.add_total,ifnull(b.his_total,0) his_total from "
+					+ " (SELECT oper_user,count(*) as add_total FROM canal_step_state where is_back='驳回' group by oper_user) a"
+					+ " left join"
+					+ " (SELECT oper_user,ifnull(count(*),0) as his_total FROM canal_step_state_his where is_back='驳回' group by oper_user) b"
+					+ " on a.oper_user = b.oper_user ) a left join "
+					+ " (SELECT oper_user,ifnull(count(*),0) as close_total FROM canal_step_state_close where is_back='驳回' group by oper_user) b "
+					+ " on a.oper_user = b.oper_user";
+			System.out.println("客户经理待处理工单查询：" + sql);
+			list1 = session.findSql(sql);
+			for (int i = 0; i < list1.size(); i++) {
+				map1 = (Map) list1.get(i);
+				operUser = map1.get("operUser").toString();
+				addTotal = map1.get("addTotal").toString();
+				hisTotal = map1.get("hisTotal").toString();
+				closeTotal = map1.get("closeTotal").toString();
+				sql = "select user_name,ifnull(user_email,'无') user_email from qdzc.sys_user where user_name= '"
+						+ operUser + "' and group_id='7'";
+				list2 = session.findSql(sql);
+				if (list2.size() > 0) {
+					map2 = (Map) list2.get(0);
+					userEmail = map2.get("userEmail").toString();
+					userName = map2.get("userName").toString();
+					String subject = userName + "：您好！您有一条被驳回的工单需要处理！";
+					content = userName + ":您好！渠道支撑系统任务提醒，1.新增流程中，您有" + addTotal
+							+ "条工单待处理；2.变更流程中，您有" + hisTotal
+							+ "条工单待处理；3.关闭流程中，您有" + closeTotal + "条工单待处理。";
+					System.out.println("用户的邮箱为：" + userEmail);
+					if (!userEmail.equals("无")) {
+						// 发邮件
+						MailUtil.send(userEmail, content, subject);
+					}
+
+				}
+			}
+		} catch (CquptException e) {
+			e.printStackTrace();
+			if (session != null) {
+				try {
+					session.exceptionCloseSession();
+				} catch (CquptException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
+	// 分公司审核待处理工单查询
+	public static void mailFGS(String manager, String canalName) {
+		DataStormSession session = null;
+		String sql = "";
+		List list1 = null;
+		Map map1 = null;
+		List list2 = null;
+		Map map2 = null;
+		String addTotal = "", hisTotal = "", closeTotal = "";
+		String userEmail = "", userName = "";
+		String content = "";
+		try {
+			String deptId = "";
+			session = DataStormSession.getInstance();
+			sql = "select a.* ,ifnull(b.close_total,0) close_total from"
+					+ " (select a.dept_id,a.add_total,ifnull(b.his_total,0) his_total from "
+					+ " (SELECT dept_id,count(*) as add_total FROM canal_step_state where current_step = 1 group by dept_id) a"
+					+ " left join"
+					+ " (SELECT dept_id,ifnull(count(*),0) as his_total FROM canal_step_state_his where current_step = 1 group by dept_id) b"
+					+ " on a.dept_id = b.dept_id ) a left join "
+					+ " (SELECT dept_id,ifnull(count(*),0) as close_total FROM canal_step_state_close where current_step = 1 group by dept_id) b "
+					+ " on a.dept_id = b.dept_id";
+			System.out.println("分公司审核待处理工单查询：" + sql);
+			list1 = session.findSql(sql);
+			for (int i = 0; i < list1.size(); i++) {
+				map1 = (Map) list1.get(i);
+				deptId = map1.get("deptId").toString();
+				addTotal = map1.get("addTotal").toString();
+				hisTotal = map1.get("hisTotal").toString();
+				closeTotal = map1.get("closeTotal").toString();
+				sql = "select user_name,if(ifnull(user_email,'无')='','无',user_email ) user_email from qdzc.sys_user where dept_id = '"
+						+ deptId + "' and group_id= '5'";
+				System.out.println("邮箱查询：" + sql);
+				list2 = session.findSql(sql);
+				for (int j = 0; j < list2.size(); j++) {
+					map2 = (Map) list2.get(j);
+					userEmail = map2.get("userEmail").toString();
+					userName = map2.get("userName").toString();
+					String subject = userName + "：您好！您有一条来自" + manager + "的名为"
+							+ canalName + "的工单需要审核！";
+					content = userName + ":您好！渠道支撑系统任务提醒，1.新增流程中，您有" + addTotal
+							+ "条工单待处理；2.变更流程中，您有" + hisTotal
+							+ "条工单待处理；3.关闭流程中，您有" + closeTotal + "条工单待处理。";
+					System.out.println("用户的邮箱为：" + userEmail);
+					if (!userEmail.equals("无")) {
+						// 发邮件
+						MailUtil.send(userEmail, content, subject);
+					}
+					// MailUtil.send("413621484@qq.com", content);
+				}
+			}
+		} catch (CquptException e) {
+			e.printStackTrace();
+			if (session != null) {
+				try {
+					session.exceptionCloseSession();
+				} catch (CquptException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
+	// 分管部门审核
+	public static void mailFGBM(String manager, String canalName) {
+		DataStormSession session = null;
+		String sql = "";
+		List list1 = null;
+		Map map1 = null;
+		List list2 = null;
+		Map map2 = null;
+		List list3 = null;
+		String addTotal = "", hisTotal = "", closeTotal = "";
+		String userEmail = "", userName = "";
+		String canalType = "";// 分管部门审核时分为开渠和非开渠
+		String content = "";
+		try {
+			session = DataStormSession.getInstance();
+			// 分管部门审核————开渠
+			sql = "select ifnull(b.canal_type,'无') canal_type,count(a.in_id) as add_total from (SELECT in_id FROM canal_step_state where current_step = 2) a left join canal_infomation b"
+					+ " on a.in_id=b.in_id where  b.canal_type like '%开放渠道%'";
+			System.out.println("新增-分管部门审核待处理工单查询：" + sql);
+			list1 = session.findSql(sql);
+			if (list1.size() > 0) {
+				map1 = (Map) list1.get(0);
+				canalType = map1.get("canalType").toString();
+				addTotal = map1.get("addTotal").toString();
+			}
+			sql = "select ifnull(b.canal_type,'无') canal_type,count(a.canal_id) as his_total from (SELECT canal_id FROM canal_step_state_his where current_step = 2) a left join canal_infomation b"
+					+ " on a.canal_id=b.canal_id where  b.canal_type like '%开放渠道%'";
+			System.out.println("变更-分管部门审核待处理工单查询：" + sql);
+			list2 = session.findSql(sql);
+			if (list2.size() > 0) {
+				map1 = (Map) list2.get(0);
+				hisTotal = map1.get("hisTotal").toString();
+			}
+			sql = "select ifnull(b.canal_type,'无') canal_type,count(a.canal_id) as close_total from (SELECT canal_id FROM canal_step_state_close where current_step = 2) a left join canal_infomation b"
+					+ " on a.canal_id=b.canal_id where  b.canal_type like '%开放渠道%'";
+			System.out.println("关闭-分管部门审核待处理工单查询：" + sql);
+			list3 = session.findSql(sql);
+			if (list3.size() > 0) {
+				map1 = (Map) list3.get(0);
+				closeTotal = map1.get("closeTotal").toString();
+			}
+			if (list1.size() > 0 || list2.size() > 0 || list3.size() > 0) {
+				// 三个流程中，有一个大于0，就要执行这个环节的邮件发送
+				sql = "select user_name,if(ifnull(user_email,'无')='','无',user_email ) user_email from qdzc.sys_user where group_id= '8'";
+				System.out.println("邮箱查询：" + sql);
+				list2 = session.findSql(sql);
+				for (int j = 0; j < list2.size(); j++) {
+					map2 = (Map) list2.get(j);
+					userEmail = map2.get("userEmail").toString();
+					userName = map2.get("userName").toString();
+					String subject = userName + "：您好！您有一条来自" + manager + "的名为"
+							+ canalName + "的工单需要审核！";
+					content = userName + ":您好！渠道支撑系统任务提醒，1.新增流程中，您有" + addTotal
+							+ "条工单待处理；2.变更流程中，您有" + hisTotal
+							+ "条工单待处理；3.关闭流程中，您有" + closeTotal + "条工单待处理。";
+					System.out.println("用户的邮箱为：" + userEmail);
+					if (!userEmail.equals("无")) {
+						// 发邮件
+						MailUtil.send(userEmail, content, subject);
+					}
+					// MailUtil.send("413621484@qq.com", content);
+				}
+			}
+
+			// 分管部门审核————非开渠
+			sql = "select ifnull(b.canal_type,'无') canal_type,count(a.in_id) as add_total from (SELECT in_id FROM canal_step_state where current_step = 2) a left join canal_infomation b"
+					+ " on a.in_id=b.in_id where  b.canal_type not like '%开放渠道%'";
+			System.out.println("新增-分管部门审核待处理工单查询：" + sql);
+			list1 = session.findSql(sql);
+			if (list1.size() > 0) {
+				map1 = (Map) list1.get(0);
+				canalType = map1.get("canalType").toString();
+				addTotal = map1.get("addTotal").toString();
+			}
+			sql = "select ifnull(b.canal_type,'无') canal_type,count(a.canal_id) as his_total from (SELECT canal_id FROM canal_step_state_his where current_step = 2) a left join canal_infomation b"
+					+ " on a.canal_id=b.canal_id where  b.canal_type not like '%开放渠道%'";
+			System.out.println("变更-分管部门审核待处理工单查询：" + sql);
+			list2 = session.findSql(sql);
+			if (list2.size() > 0) {
+				map1 = (Map) list2.get(0);
+				hisTotal = map1.get("hisTotal").toString();
+			}
+			sql = "select ifnull(b.canal_type,'无') canal_type,count(a.canal_id) as close_total from (SELECT canal_id FROM canal_step_state_close where current_step = 2) a left join canal_infomation b"
+					+ " on a.canal_id=b.canal_id where  b.canal_type not like '%开放渠道%'";
+			System.out.println("关闭-分管部门审核待处理工单查询：" + sql);
+			list3 = session.findSql(sql);
+			if (list3.size() > 0) {
+				map1 = (Map) list3.get(0);
+				closeTotal = map1.get("closeTotal").toString();
+			}
+			if (list1.size() > 0 || list2.size() > 0 || list3.size() > 0) {
+				// 三个流程中，有一个大于0，就要执行这个环节的邮件发送
+				sql = "select user_name,if(ifnull(user_email,'无')='','无',user_email ) user_email from qdzc.sys_user where group_id= '9'";
+				System.out.println("邮箱查询：" + sql);
+				list2 = session.findSql(sql);
+				for (int j = 0; j < list2.size(); j++) {
+					map2 = (Map) list2.get(j);
+					userEmail = map2.get("userEmail").toString();
+					userName = map2.get("userName").toString();
+					String subject = userName + "：您好！您有一条来自" + manager + "的名为"
+							+ canalName + "的工单需要审核！";
+					content = userName + ":您好！渠道支撑系统任务提醒，1.新增流程中，您有" + addTotal
+							+ "条工单待处理；2.变更流程中，您有" + hisTotal
+							+ "条工单待处理；3.关闭流程中，您有" + closeTotal + "条工单待处理。";
+					System.out.println("用户的邮箱为：" + userEmail);
+					if (!userEmail.equals("无")) {
+						// 发邮件
+						MailUtil.send(userEmail, content, subject);
+					}
+					// MailUtil.send("413621484@qq.com", content);
+				}
+			}
+		} catch (CquptException e) {
+			e.printStackTrace();
+			if (session != null) {
+				try {
+					session.exceptionCloseSession();
+				} catch (CquptException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
+	// 财务审核流程
+	public static void mailCWSH(String manager, String canalName) {
+		DataStormSession session = null;
+		String sql = "";
+		List list1 = null;
+		Map map1 = null;
+		List list2 = null;
+		Map map2 = null;
+		List list3 = null;
+		String addTotal = "", hisTotal = "", closeTotal = "";
+		String userEmail = "", userName = "";
+		String content = "";
+		try {
+			session = DataStormSession.getInstance();
+			sql = "SELECT count(t.in_id) add_total FROM canal_step_state t where t.current_step = '3' ";
+			list1 = session.findSql(sql);
+			if (list1.size() > 0) {
+				map1 = (Map) list1.get(0);
+				addTotal = map1.get("addTotal").toString();
+			}
+			sql = "SELECT count(t.in_id) his_total FROM canal_step_state_his t where t.current_step = 3 ";
+			list2 = session.findSql(sql);
+			if (list2.size() > 0) {
+				map1 = (Map) list2.get(0);
+				hisTotal = map1.get("hisTotal").toString();
+			}
+			sql = "SELECT count(t.in_id) close_total FROM canal_step_state_close t where t.current_step = 11 ";
+			list3 = session.findSql(sql);
+			if (list3.size() > 0) {
+				map1 = (Map) list3.get(0);
+				closeTotal = map1.get("closeTotal").toString();
+			}
+			if (list1.size() > 0 || list2.size() > 0 || list3.size() > 0) {
+				// 两个流程中，有一个大于0，就要执行这个环节的邮件发送
+				sql = "select user_name,if(ifnull(user_email,'无')='','无',user_email ) user_email from qdzc.sys_user where group_id= '13'";
+				list2 = session.findSql(sql);
+				for (int j = 0; j < list2.size(); j++) {
+					map2 = (Map) list2.get(j);
+					userEmail = map2.get("userEmail").toString();
+					userName = map2.get("userName").toString();
+					String subject = userName + "：您好！您有一条来自" + manager + "的名为"
+							+ canalName + "的工单需要审核！";
+					content = userName + ":您好！渠道支撑系统任务提醒，1.新增流程中，您有" + addTotal
+							+ "条工单待处理；2.变更流程中，您有" + hisTotal
+							+ "条工单待处理；3.关闭流程中，您有" + closeTotal + "条工单待处理。";
+					if (!userEmail.equals("无")) {
+						// 发邮件
+						MailUtil.send(userEmail, content, subject);
+					}
+				}
+			}
+		} catch (CquptException e) {
+			e.printStackTrace();
+			if (session != null) {
+				try {
+					session.exceptionCloseSession();
+				} catch (CquptException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
+	// 代理商管理系统流程
+	public static void mailDLSGL(String manager, String canalName) {
+		DataStormSession session = null;
+		String sql = "";
+		List list1 = null;
+		Map map1 = null;
+		List list2 = null;
+		Map map2 = null;
+		List list3 = null;
+		String addTotal = "", hisTotal = "", closeTotal = "";
+		String userEmail = "", userName = "";
+		String content = "";
+		try {
+			session = DataStormSession.getInstance();
+			sql = "SELECT count(t.in_id) add_total FROM canal_step_state t where t.current_step = 13 ";
+			list1 = session.findSql(sql);
+			if (list1.size() > 0) {
+				map1 = (Map) list1.get(0);
+				addTotal = map1.get("addTotal").toString();
+			}
+			sql = "SELECT count(t.in_id) his_total FROM canal_step_state_his t where t.current_step = 7 ";
+			list2 = session.findSql(sql);
+			if (list2.size() > 0) {
+				map1 = (Map) list2.get(0);
+				hisTotal = map1.get("hisTotal").toString();
+			}
+			sql = "SELECT count(t.in_id) close_total FROM canal_step_state_close t where t.current_step = 4 ";
+			list3 = session.findSql(sql);
+			if (list3.size() > 0) {
+				map1 = (Map) list3.get(0);
+				closeTotal = map1.get("closeTotal").toString();
+			}
+			if (list1.size() > 0 || list2.size() > 0 || list3.size() > 0) {
+				// 两个流程中，有一个大于0，就要执行这个环节的邮件发送
+				sql = "select user_name,if(ifnull(user_email,'无')='','无',user_email ) user_email from qdzc.sys_user where group_id= '16'";
+				list2 = session.findSql(sql);
+				for (int j = 0; j < list2.size(); j++) {
+					map2 = (Map) list2.get(j);
+					userEmail = map2.get("userEmail").toString();
+					userName = map2.get("userName").toString();
+					String subject = userName + "：您好！您有一条来自" + manager + "的名为"
+							+ canalName + "的工单需要处理！";
+					content = userName + ":您好！渠道支撑系统任务提醒，1.新增流程中，您有" + addTotal
+							+ "条工单待处理；2.变更流程中，您有" + hisTotal
+							+ "条工单待处理；3.关闭流程中，您有" + closeTotal + "条工单待处理。";
+					if (!userEmail.equals("无")) {
+						// 发邮件
+						MailUtil.send(userEmail, content, subject);
+					}
+				}
+			}
+		} catch (CquptException e) {
+			e.printStackTrace();
+			if (session != null) {
+				try {
+					session.exceptionCloseSession();
+				} catch (CquptException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
+	// 开CRM工号流程
+	public static void mailKCRM(String manager, String canalName) {
+		DataStormSession session = null;
+		String sql = "";
+		List list1 = null;
+		Map map1 = null;
+		List list2 = null;
+		Map map2 = null;
+		List list3 = null;
+		String addTotal = "", hisTotal = "", closeTotal = "";
+		String userEmail = "", userName = "";
+		String content = "";
+		try {
+			session = DataStormSession.getInstance();
+			sql = "SELECT count(t.in_id) add_total FROM canal_step_state t where t.current_step = 4 ";
+			list1 = session.findSql(sql);
+			if (list1.size() > 0) {
+				map1 = (Map) list1.get(0);
+				addTotal = map1.get("addTotal").toString();
+			}
+			sql = "SELECT count(t.in_id) his_total FROM canal_step_state_his t where t.current_step = 4 ";
+			list2 = session.findSql(sql);
+			if (list2.size() > 0) {
+				map1 = (Map) list2.get(0);
+				hisTotal = map1.get("hisTotal").toString();
+			}
+			sql = "SELECT count(t.in_id) close_total FROM canal_step_state_close t where t.current_step = 3 ";
+			list3 = session.findSql(sql);
+			if (list3.size() > 0) {
+				map1 = (Map) list3.get(0);
+				closeTotal = map1.get("closeTotal").toString();
+			}
+			if (list1.size() > 0 || list2.size() > 0 || list3.size() > 0) {
+				// 两个流程中，有一个大于0，就要执行这个环节的邮件发送
+				sql = "select user_name,if(ifnull(user_email,'无')='','无',user_email ) user_email from qdzc.sys_user where group_id= '17'";
+				list2 = session.findSql(sql);
+				for (int j = 0; j < list2.size(); j++) {
+					map2 = (Map) list2.get(j);
+					userEmail = map2.get("userEmail").toString();
+					userName = map2.get("userName").toString();
+					String subject = userName + "：您好！您有一条来自" + manager + "的名为"
+							+ canalName + "的工单需要处理！";
+					content = userName + ":您好！渠道支撑系统任务提醒，1.新增流程中，您有" + addTotal
+							+ "条工单待处理；2.变更流程中，您有" + hisTotal
+							+ "条工单待处理；3.关闭流程中，您有" + closeTotal + "条工单待处理。";
+					if (!userEmail.equals("无")) {
+						// 发邮件
+						MailUtil.send(userEmail, content, subject);
+					}
+				}
+			}
+		} catch (CquptException e) {
+			e.printStackTrace();
+			if (session != null) {
+				try {
+					session.exceptionCloseSession();
+				} catch (CquptException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
+	// 开代理商门户网站工号
+	public static void mailKDLSMHWZ(String manager, String canalName) {
+		DataStormSession session = null;
+		String sql = "";
+		List list1 = null;
+		Map map1 = null;
+		List list2 = null;
+		Map map2 = null;
+		List list3 = null;
+		String addTotal = "", closeTotal = "";
+		String userEmail = "", userName = "";
+		String content = "";
+		try {
+			session = DataStormSession.getInstance();
+			sql = "SELECT count(t.in_id) add_total FROM canal_step_state t where t.current_step = 5 ";
+			list1 = session.findSql(sql);
+			if (list1.size() > 0) {
+				map1 = (Map) list1.get(0);
+				addTotal = map1.get("addTotal").toString();
+			}
+			sql = "SELECT count(t.in_id) close_total FROM canal_step_state_close t where t.current_step = 6 ";
+			list3 = session.findSql(sql);
+			if (list3.size() > 0) {
+				map1 = (Map) list3.get(0);
+				closeTotal = map1.get("closeTotal").toString();
+			}
+			if (list1.size() > 0 || list3.size() > 0) {
+				// 两个流程中，有一个大于0，就要执行这个环节的邮件发送
+				sql = "select user_name,if(ifnull(user_email,'无')='','无',user_email ) user_email from qdzc.sys_user where group_id= '18'";
+				list2 = session.findSql(sql);
+				for (int j = 0; j < list2.size(); j++) {
+					map2 = (Map) list2.get(j);
+					userEmail = map2.get("userEmail").toString();
+					userName = map2.get("userName").toString();
+					String subject = userName + "：您好！您有一条来自" + manager + "的名为"
+							+ canalName + "的工单需要处理！";
+					content = userName + ":您好！渠道支撑系统任务提醒，1.新增流程中，您有" + addTotal
+							+ "条工单待处理；2.关闭流程中，您有" + closeTotal + "条工单待处理。";
+					if (!userEmail.equals("无")) {
+						// 发邮件
+						MailUtil.send(userEmail, content, subject);
+					}
+				}
+			}
+		} catch (CquptException e) {
+			e.printStackTrace();
+			if (session != null) {
+				try {
+					session.exceptionCloseSession();
+				} catch (CquptException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
+	// 资金稽核编码
+	public static void mailZJJH(String manager, String canalName) {
+		DataStormSession session = null;
+		String sql = "";
+		List list1 = null;
+		Map map1 = null;
+		List list2 = null;
+		Map map2 = null;
+		List list3 = null;
+		String addTotal = "", closeTotal = "";
+		String userEmail = "", userName = "";
+		String content = "";
+		try {
+			session = DataStormSession.getInstance();
+			sql = "SELECT count(t.in_id) add_total FROM canal_step_state t where t.current_step = 6 ";
+			list1 = session.findSql(sql);
+			if (list1.size() > 0) {
+				map1 = (Map) list1.get(0);
+				addTotal = map1.get("addTotal").toString();
+			}
+
+			sql = "SELECT count(t.in_id) close_total FROM canal_step_state_close t where t.current_step = 7 ";
+			list3 = session.findSql(sql);
+			if (list3.size() > 0) {
+				map1 = (Map) list3.get(0);
+				closeTotal = map1.get("closeTotal").toString();
+			}
+			if (list1.size() > 0 || list3.size() > 0) {
+				// 两个流程中，有一个大于0，就要执行这个环节的邮件发送
+				sql = "select user_name,if(ifnull(user_email,'无')='','无',user_email ) user_email from qdzc.sys_user where group_id= '19'";
+				list2 = session.findSql(sql);
+				for (int j = 0; j < list2.size(); j++) {
+					map2 = (Map) list2.get(j);
+					userEmail = map2.get("userEmail").toString();
+					userName = map2.get("userName").toString();
+					String subject = userName + "：您好！您有一条来自" + manager + "的名为"
+							+ canalName + "的工单需要处理！";
+					content = userName + ":您好！渠道支撑系统任务提醒，1.新增流程中，您有" + addTotal
+							+ "条工单待处理；2.关闭流程中，您有" + closeTotal + "条工单待处理。";
+					if (!userEmail.equals("无")) {
+						// 发邮件
+						MailUtil.send(userEmail, content, subject);
+					}
+				}
+			}
+		} catch (CquptException e) {
+			e.printStackTrace();
+			if (session != null) {
+				try {
+					session.exceptionCloseSession();
+				} catch (CquptException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
+	// 稽核操作
+	public static void mailJHCZ(String manager, String canalName) {
+		DataStormSession session = null;
+		String sql = "";
+		List list1 = null;
+		Map map1 = null;
+		List list2 = null;
+		Map map2 = null;
+		List list3 = null;
+		String addTotal = "", closeTotal = "";
+		String userEmail = "", userName = "";
+		String content = "";
+		try {
+			session = DataStormSession.getInstance();
+			sql = "SELECT count(t.in_id) add_total FROM canal_step_state t where t.current_step = 7 ";
+			list1 = session.findSql(sql);
+			if (list1.size() > 0) {
+				map1 = (Map) list1.get(0);
+				addTotal = map1.get("addTotal").toString();
+			}
+
+			sql = "SELECT count(t.in_id) close_total FROM canal_step_state_close t where t.current_step = 10 ";
+			list3 = session.findSql(sql);
+			if (list3.size() > 0) {
+				map1 = (Map) list3.get(0);
+				closeTotal = map1.get("closeTotal").toString();
+			}
+			if (list1.size() > 0 || list3.size() > 0) {
+				// 两个流程中，有一个大于0，就要执行这个环节的邮件发送
+				sql = "select user_name,if(ifnull(user_email,'无')='','无',user_email ) user_email from qdzc.sys_user where group_id= '22'";
+				list2 = session.findSql(sql);
+				for (int j = 0; j < list2.size(); j++) {
+					map2 = (Map) list2.get(j);
+					userEmail = map2.get("userEmail").toString();
+					userName = map2.get("userName").toString();
+					String subject = userName + "：您好！您有一条来自" + manager + "的名为"
+							+ canalName + "的工单需要处理！";
+					content = userName + ":您好！渠道支撑系统任务提醒，1.新增流程中，您有" + addTotal
+							+ "条工单待处理；2.关闭流程中，您有" + closeTotal + "条工单待处理。";
+					if (!userEmail.equals("无")) {
+						// 发邮件
+						MailUtil.send(userEmail, content, subject);
+					}
+				}
+			}
+		} catch (CquptException e) {
+			e.printStackTrace();
+			if (session != null) {
+				try {
+					session.exceptionCloseSession();
+				} catch (CquptException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
+	// 专线受理
+	public static void mailZXSL(String manager, String canalName) {
+		DataStormSession session = null;
+		String sql = "";
+		List list1 = null;
+		Map map1 = null;
+		List list2 = null;
+		Map map2 = null;
+		List list3 = null;
+		String addTotal = "", closeTotal = "";
+		String userEmail = "", userName = "";
+		String content = "";
+		try {
+			session = DataStormSession.getInstance();
+			sql = "SELECT count(t.in_id) add_total FROM canal_step_state t where (t.current_step BETWEEN 3 and  8 or t.current_step = 13 ) and t.parallel_step = 0";
+			System.out.println("新增-专线受理待处理工单查询：" + sql);
+			list1 = session.findSql(sql);
+			if (list1.size() > 0) {
+				map1 = (Map) list1.get(0);
+				addTotal = map1.get("addTotal").toString();
+			}
+			sql = "SELECT count(t.in_id) close_total FROM canal_step_state_close t where t.current_step = 8";
+			System.out.println("关闭-专线受理待处理工单查询：" + sql);
+			list3 = session.findSql(sql);
+			if (list3.size() > 0) {
+				map1 = (Map) list3.get(0);
+				closeTotal = map1.get("closeTotal").toString();
+			}
+			if (list1.size() > 0 || list3.size() > 0) {
+				// 两个流程中，有一个大于0，就要执行这个环节的邮件发送
+				sql = "select user_name,if(ifnull(user_email,'无')='','无',user_email ) user_email from qdzc.sys_user where group_id= '14'";
+				System.out.println("邮箱查询：" + sql);
+				list2 = session.findSql(sql);
+				for (int j = 0; j < list2.size(); j++) {
+					map2 = (Map) list2.get(j);
+					userEmail = map2.get("userEmail").toString();
+					userName = map2.get("userName").toString();
+					String subject = userName + "：您好！您有一条来自" + manager + "的名为"
+							+ canalName + "的工单需要处理！";
+					content = userName + ":您好！渠道支撑系统任务提醒，1.新增流程中，您有" + addTotal
+							+ "条工单待处理；2.关闭流程中，您有" + closeTotal + "条工单待处理。";
+					System.out.println("用户的邮箱为：" + userEmail);
+					if (!userEmail.equals("无")) {
+						// 发邮件
+						MailUtil.send(userEmail, content, subject);
+					}
+					// MailUtil.send("413621484@qq.com", content);
+
+				}
+			}
+		} catch (CquptException e) {
+			e.printStackTrace();
+			if (session != null) {
+				try {
+					session.exceptionCloseSession();
+				} catch (CquptException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
+	// 设备基础配置
+	public static void mailSBJCPZ(String manager, String canalName) {
+		DataStormSession session = null;
+		String sql = "";
+		List list1 = null;
+		Map map1 = null;
+		List list2 = null;
+		Map map2 = null;
+		List list3 = null;
+		String addTotal = "", closeTotal = "";
+		String userEmail = "", userName = "";
+		String content = "";
+		try {
+			session = DataStormSession.getInstance();
+			sql = "SELECT count(t.in_id) add_total FROM canal_step_state t where t.current_step = 9 ";
+			list1 = session.findSql(sql);
+			if (list1.size() > 0) {
+				map1 = (Map) list1.get(0);
+				addTotal = map1.get("addTotal").toString();
+			}
+
+			sql = "SELECT count(t.in_id) close_total FROM canal_step_state_close t where t.current_step = 9 ";
+			list3 = session.findSql(sql);
+			if (list3.size() > 0) {
+				map1 = (Map) list3.get(0);
+				closeTotal = map1.get("closeTotal").toString();
+			}
+			if (list1.size() > 0 || list3.size() > 0) {
+				// 两个流程中，有一个大于0，就要执行这个环节的邮件发送
+				sql = "select user_name,if(ifnull(user_email,'无')='','无',user_email ) user_email from qdzc.sys_user where group_id= '21'";
+				list2 = session.findSql(sql);
+				for (int j = 0; j < list2.size(); j++) {
+					map2 = (Map) list2.get(j);
+					userEmail = map2.get("userEmail").toString();
+					userName = map2.get("userName").toString();
+					String subject = userName + "：您好！您有一条来自" + manager + "的名为"
+							+ canalName + "的工单需要处理！";
+					content = userName + ":您好！渠道支撑系统任务提醒，1.新增流程中，您有" + addTotal
+							+ "条工单待处理；2.关闭流程中，您有" + closeTotal + "条工单待处理。";
+					if (!userEmail.equals("无")) {
+						// 发邮件
+						MailUtil.send(userEmail, content, subject);
+					}
+
+				}
+			}
+		} catch (CquptException e) {
+			e.printStackTrace();
+			if (session != null) {
+				try {
+					session.exceptionCloseSession();
+				} catch (CquptException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
+	// 渠道归属
+	public static void mailQDGS(String manager, String canalName) {
+		DataStormSession session = null;
+		String sql = "";
+		Map map1 = null;
+		List list2 = null;
+		Map map2 = null;
+		List list3 = null;
+		String closeTotal = "";
+		String userEmail = "", userName = "";
+		String content = "";
+		try {
+			session = DataStormSession.getInstance();
+			sql = "SELECT count(t.in_id) close_total FROM canal_step_state_close t where t.current_step = 5 ";
+			list3 = session.findSql(sql);
+			if (list3.size() > 0) {
+				map1 = (Map) list3.get(0);
+				closeTotal = map1.get("closeTotal").toString();
+			}
+			if (list3.size() > 0) {
+				// 两个流程中，有一个大于0，就要执行这个环节的邮件发送
+				sql = "select user_name,if(ifnull(user_email,'无')='','无',user_email ) user_email from qdzc.sys_user where group_id= '23'";
+				list2 = session.findSql(sql);
+				for (int j = 0; j < list2.size(); j++) {
+					map2 = (Map) list2.get(j);
+					userEmail = map2.get("userEmail").toString();
+					userName = map2.get("userName").toString();
+					String subject = userName + "：您好！您有一条来自" + manager + "的名为"
+							+ canalName + "的工单需要处理！";
+					content = userName + ":您好！渠道支撑系统任务提醒，关闭流程中，您有" + closeTotal
+							+ "条工单待处理。";
+					if (!userEmail.equals("无")) {
+						// 发邮件
+						MailUtil.send(userEmail, content, subject);
+					}
+
+				}
+			}
+		} catch (CquptException e) {
+			e.printStackTrace();
+			if (session != null) {
+				try {
+					session.exceptionCloseSession();
+				} catch (CquptException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+
+	// 翼支付
+	public static void mailYZF(String manager, String canalName) {
+		DataStormSession session = null;
+		String sql = "";
+		List list1 = null;
+		Map map1 = null;
+		List list2 = null;
+		Map map2 = null;
+		List list3 = null;
+		String operUser = "";
+		String addTotal = "", hisTotal = "", closeTotal = "";
+		String userEmail = "", userName = "";
+		String canalType = "";// 分管部门审核时分为开渠和非开渠
+		String content = "";
+		try {
+			session = DataStormSession.getInstance();
+			sql = "SELECT count(t.in_id) add_total FROM canal_step_state t where (t.current_step BETWEEN 3 and  10 or t.current_step = 13 ) and t.yzf_parallel_step = 0";
+			System.out.println("新增-翼支付待处理工单查询：" + sql);
+			list1 = session.findSql(sql);
+			if (list1.size() > 0) {
+				map1 = (Map) list1.get(0);
+				addTotal = map1.get("addTotal").toString();
+			}
+
+			if (list1.size() > 0) {
+				// 大于0，就要执行这个环节的邮件发送
+				sql = "select user_name,if(ifnull(user_email,'无')='','无',user_email ) user_email from qdzc.sys_user where group_id= '15'";
+				System.out.println("邮箱查询：" + sql);
+				list2 = session.findSql(sql);
+				for (int j = 0; j < list2.size(); j++) {
+					map2 = (Map) list2.get(j);
+					userEmail = map2.get("userEmail").toString();
+					userName = map2.get("userName").toString();
+					String subject = userName + "：您好！您有一条来自" + manager + "的名为"
+							+ canalName + "的工单需要处理！";
+					content = userName + ":您好！渠道支撑系统任务提醒，1.新增流程中，您有" + addTotal
+							+ "条工单待处理。";
+					System.out.println("用户的邮箱为：" + userEmail);
+					if (!userEmail.equals("无")) {
+						// 发邮件
+						MailUtil.send(userEmail, content, subject);
+					}
+				}
+			}
+			session.closeSession();
+		} catch (CquptException e) {
+			e.printStackTrace();
+			if (session != null) {
+				try {
+					session.exceptionCloseSession();
+				} catch (CquptException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+
+	}
+}

@@ -1,0 +1,228 @@
+package com.cqupt.canalManage.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
+import org.apache.struts2.ServletActionContext;
+
+import com.cqupt.pub.dao.DataStormSession;
+import com.cqupt.pub.exception.CquptException;
+import com.cqupt.pub.util.Md;
+import com.opensymphony.xwork2.ActionSupport;
+
+public class AgentModifyAction extends ActionSupport {
+
+	private static final long serialVersionUID = -6941574699319426537L;
+	Logger logger = Logger.getLogger(getClass());
+	HttpServletRequest request = null;
+	private Md md5fun = new Md();
+
+	public String execute() {
+
+		this.request = ServletActionContext.getRequest();
+		String deptId = request.getSession().getAttribute("deptId").toString();
+		String deptName = request.getSession().getAttribute("deptName")
+				.toString();
+		String operUser = request.getSession().getAttribute("userName")
+				.toString();
+
+		try {
+			String inId = java.net.URLDecoder.decode(
+					request.getParameter("inId"), "UTF-8");
+			String branchCompany = java.net.URLDecoder.decode(
+					request.getParameter("branchCompany"), "UTF-8");
+			String areaName = java.net.URLDecoder.decode(
+					request.getParameter("areaName"), "UTF-8");
+			String agentId = java.net.URLDecoder.decode(
+					request.getParameter("agentId"), "UTF-8");
+			String agentName = java.net.URLDecoder.decode(
+					request.getParameter("agentName"), "UTF-8");
+			String agentShortName = java.net.URLDecoder.decode(
+					request.getParameter("agentShortName"), "UTF-8");
+			// String agentState = java.net.URLDecoder.decode(
+			// request.getParameter("agentState"), "UTF-8");
+			String agentDept = java.net.URLDecoder.decode(
+					request.getParameter("agentDept"), "UTF-8");
+			String agentLevel = java.net.URLDecoder.decode(
+					request.getParameter("agentLevel"), "UTF-8");
+			String companyType = java.net.URLDecoder.decode(
+					request.getParameter("companyType"), "UTF-8");
+
+			String cooperationType = java.net.URLDecoder.decode(
+					request.getParameter("cooperationType"), "UTF-8");
+			String legalPerson = java.net.URLDecoder.decode(
+					request.getParameter("legalPerson"), "UTF-8");
+			String legalPhone = java.net.URLDecoder.decode(
+					request.getParameter("legalPhone"), "UTF-8");
+			String legalCardType = java.net.URLDecoder.decode(
+					request.getParameter("legalCardType"), "UTF-8");
+			String legalIdCard = java.net.URLDecoder.decode(
+					request.getParameter("legalIdCard"), "UTF-8");
+			String manageModel = java.net.URLDecoder.decode(
+					request.getParameter("manageModel"), "UTF-8");
+			String is11888Card = java.net.URLDecoder.decode(
+					request.getParameter("is11888Card"), "UTF-8");
+			String ondutyPerson = java.net.URLDecoder.decode(
+					request.getParameter("ondutyPerson"), "UTF-8");
+			String ondutyPersonPhone = java.net.URLDecoder.decode(
+					request.getParameter("ondutyPersonPhone"), "UTF-8");
+
+			String startBank = java.net.URLDecoder.decode(
+					request.getParameter("startBank"), "UTF-8");
+			String bankAccountId = java.net.URLDecoder.decode(
+					request.getParameter("bankAccountId"), "UTF-8");
+			String parentId = java.net.URLDecoder.decode(
+					request.getParameter("parentId"), "UTF-8");
+			String parentName = java.net.URLDecoder.decode(
+					request.getParameter("parentName"), "UTF-8");
+			String companyAddress = java.net.URLDecoder.decode(
+					request.getParameter("companyAddress"), "UTF-8");
+			String ondutyPersonAddress = java.net.URLDecoder.decode(
+					request.getParameter("ondutyPersonAddress"), "UTF-8");
+			String ondutyPersonQqnum = java.net.URLDecoder.decode(
+					request.getParameter("ondutyPersonQqnum"), "UTF-8");
+			String postCode = java.net.URLDecoder.decode(
+					request.getParameter("postCode"), "UTF-8");
+			String agentFax = java.net.URLDecoder.decode(
+					request.getParameter("agentFax"), "UTF-8");
+
+			String agentEmail = java.net.URLDecoder.decode(
+					request.getParameter("agentEmail"), "UTF-8");
+			String payWay = java.net.URLDecoder.decode(
+					request.getParameter("payWay"), "UTF-8");
+			String bankAccountName = java.net.URLDecoder.decode(
+					request.getParameter("bankAccountName"), "UTF-8");
+			String weituoStartBank = java.net.URLDecoder.decode(
+					request.getParameter("weituoStartBank"), "UTF-8");
+			String weituoBankAccount = java.net.URLDecoder.decode(
+					request.getParameter("weituoBankAccount"), "UTF-8");
+			String weituoBankName = java.net.URLDecoder.decode(
+					request.getParameter("weituoBankName"), "UTF-8");
+			String payObject = java.net.URLDecoder.decode(
+					request.getParameter("payObject"), "UTF-8");
+			String registerMoney = java.net.URLDecoder.decode(
+					request.getParameter("registerMoney"), "UTF-8");
+			String registerDate = java.net.URLDecoder.decode(
+					request.getParameter("registerDate"), "UTF-8");
+
+			String businessLicenseId = java.net.URLDecoder.decode(
+					request.getParameter("businessLicenseId"), "UTF-8");
+			String taxRegisteId = java.net.URLDecoder.decode(
+					request.getParameter("taxRegisteId"), "UTF-8");
+			String bankPermisionId = java.net.URLDecoder.decode(
+					request.getParameter("bankPermisionId"), "UTF-8");
+			String organizationCodeId = java.net.URLDecoder.decode(
+					request.getParameter("organizationCodeId"), "UTF-8");
+			String remark = java.net.URLDecoder.decode(
+					request.getParameter("remark"), "UTF-8");
+
+			HttpServletResponse response = ServletActionContext.getResponse();
+
+			response.setCharacterEncoding("UTF-8");
+			PrintWriter out;
+			out = response.getWriter();
+			out.print(modifyAgentInfo(inId, branchCompany, areaName, agentId,
+					agentName, agentShortName, agentDept,
+					agentLevel, companyType, cooperationType, legalPerson,
+					legalPhone, legalCardType, legalIdCard, manageModel,
+					is11888Card, ondutyPerson, ondutyPersonPhone, startBank,
+					bankAccountId, parentId, parentName, companyAddress,
+					ondutyPersonAddress, ondutyPersonQqnum, postCode, agentFax,
+					agentEmail, payWay, bankAccountName, weituoStartBank,
+					weituoBankAccount, weituoBankName, payObject,
+					registerMoney, registerDate, businessLicenseId,
+					taxRegisteId, bankPermisionId, organizationCodeId,
+					operUser, deptName, remark));
+			out.flush();
+			out.close();
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+
+	}
+
+	private String modifyAgentInfo(String inId, String branchCompany,
+			String areaName, String agentId, String agentName,
+			String agentShortName, String agentDept,
+			String agentLevel, String companyType, String cooperationType,
+			String legalPerson, String legalPhone, String legalCardType,
+			String legalIdCard, String manageModel, String is11888Card,
+			String ondutyPerson, String ondutyPersonPhone, String startBank,
+			String bankAccountId, String parentId, String parentName,
+			String companyAddress, String ondutyPersonAddress,
+			String ondutyPersonQqnum, String postCode, String agentFax,
+			String agentEmail, String payWay, String bankAccountName,
+			String weituoStartBank, String weituoBankAccount,
+			String weituoBankName, String payObject, String registerMoney,
+			String registerDate, String businessLicenseId, String taxRegisteId,
+			String bankPermisionId, String organizationCodeId, String operUser,
+			String deptName, String remark) {
+		DataStormSession session = null;
+		String resultStr = "";
+		String sql = "";
+
+		try {
+			session = DataStormSession.getInstance();
+			sql = "update agent_information set branch_company='"
+					+ branchCompany + "',area_name='" + areaName
+					+ "',agent_name='" + agentName + "',agent_short_name='"
+					+ agentShortName + "',agent_id='" + agentId
+					+ "',agent_dept='" + agentDept + "',agent_level='"
+					+ agentLevel + "',agent_state='正常',agent_dept='"
+					+ agentDept + "',agent_level='"
+					+ agentLevel + "',company_type='" + companyType
+					+ "',cooperation_type='" + cooperationType
+					+ "',legal_person='" + legalPerson + "',legal_phone='"
+					+ legalPhone + "',legal_card_type='" + legalCardType
+					+ "',legal_id_card='" + legalIdCard + "',manage_model='"
+					+ manageModel + "',is_11888_card='" + is11888Card
+					+ "',onduty_person='" + ondutyPerson
+					+ "',onduty_person_phone='" + ondutyPersonPhone
+					+ "',start_bank='" + startBank + "',bank_accountId='"
+					+ bankAccountId + "',parent_id='" + parentId
+					+ "',parent_name='" + parentName + "',company_address='"
+					+ companyAddress + "',onduty_person_address='"
+					+ ondutyPersonAddress + "',onduty_person_qqnum='"
+					+ ondutyPersonQqnum + "',post_code='" + postCode
+					+ "',agent_fax='" + agentFax + "',agent_email='"
+					+ agentEmail + "',pay_way='" + payWay
+					+ "',bank_account_name='" + bankAccountName
+					+ "',weituo_start_bank='" + weituoStartBank
+					+ "',weituo_bank_account='" + weituoBankAccount
+					+ "',weituo_bank_name='" + weituoBankName
+					+ "',pay_object='" + payObject + "',register_money='"
+					+ registerMoney + "',register_date='" + registerDate
+					+ "',business_license_id='" + businessLicenseId
+					+ "',tax_registe_id='" + taxRegisteId
+					+ "',bank_permision_id='" + bankPermisionId
+					+ "',organization_code_id='" + organizationCodeId
+					+ "',oper_user='" + operUser + "',dept_name='" + deptName
+					+ "',remark='" + remark + "' where in_id=" + inId;
+			logger.info("添加用户：" + sql);
+			session.update(sql);
+
+			resultStr = "success";
+			session.closeSession();
+		} catch (Exception e) {
+			resultStr = "error";
+			try {
+				session.exceptionCloseSession();
+			} catch (CquptException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+
+		}
+		return resultStr;
+
+	}
+}

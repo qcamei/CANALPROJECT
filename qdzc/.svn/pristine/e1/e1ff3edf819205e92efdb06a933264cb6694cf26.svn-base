@@ -1,0 +1,1560 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ taglib uri="/WEB-INF/tld/operatorUser.tld" prefix="operatorUser" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>渠道信息修改页面</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="./com_css/css/common.css" rel="stylesheet" type="text/css"/>
+  <link href="./com_css/css/serviceAccept.css" rel="stylesheet" type="text/css"/>
+ <link href="./com_css/LigerUILib/ligerUI/skins/Aqua/css/ligerui-all.css" rel="stylesheet" type="text/css" />
+    <link href="./com_css/LigerUILib/ligerUI/skins/ligerui-icons.css" rel="stylesheet" type="text/css" />    
+        <link href="./com_css/LigerUILib/ligerUI/skins/Gray/css/all.css" rel="stylesheet" type="text/css" />
+    <script src="./com_css/LigerUILib/jquery/jquery-1.3.2.min.js" type="text/javascript"></script>
+    <script src="./com_css/LigerUILib/ligerUI/js/core/base.js" type="text/javascript"></script>    
+    <script src="./com_css/LigerUILib/ligerUI/js/plugins/ligerGrid.js" type="text/javascript"></script>  
+    <script src="./com_css/LigerUILib/ligerUI/js/plugins/ligerForm.js" type="text/javascript"></script>
+    <script src="./com_css/LigerUILib/ligerUI/js/plugins/ligerDateEditor.js" type="text/javascript"></script>
+    <script src="./com_css/LigerUILib/ligerUI/js/plugins/ligerComboBox.js" type="text/javascript"></script>
+    <script src="./com_css/LigerUILib/ligerUI/js/plugins/ligerCheckBox.js" type="text/javascript"></script>
+    <script src="./com_css/LigerUILib/ligerUI/js/plugins/ligerSpinner.js" type="text/javascript"></script>  
+    <script src="./com_css/LigerUILib/ligerUI/js/plugins/ligerRadio.js" type="text/javascript"></script>      
+    <script src="./com_css/LigerUILib/ligerUI/js/plugins/ligerButton.js" type="text/javascript"></script>
+    <script src="./com_css/LigerUILib/ligerUI/js/plugins/ligerDialog.js" type="text/javascript"></script>    
+    <script src="./com_css/LigerUILib/ligerUI/js/plugins/ligerTextBox.js" type="text/javascript"></script> 
+  <script src="./com_css/LigerUILib/ligerUI/js/plugins/ligerTip.js" type="text/javascript"></script>
+    <script src="./com_css/LigerUILib/jquery-validation/jquery.validate.min.js" type="text/javascript"></script> 
+    <script src="./com_css/LigerUILib/jquery-validation/jquery.metadata.js" type="text/javascript"></script>
+    <script src="./com_css/LigerUILib/jquery-validation/messages_cn.js" type="text/javascript"></script>
+    <script src="./com_css/js/jquery.blockUI.js" type="text/javascript"></script>
+    <script src="./com_css/LigerUILib/ligerUI/js/plugins/ligerResizable.js" type="text/javascript"></script>     
+ 	<script src="./com_css/uploadify/swfobject.js" type="text/javascript" ></script>
+	<script src="./com_css/uploadify/jquery.uploadify.v2.1.4.min.js" type="text/javascript"></script>
+   <link href="./com_css/jqueryUI/themes/base/jquery.ui.all.css" rel="stylesheet">
+	<script src="./com_css/jqueryUI/ui/jquery.ui.core.js"></script>
+	<script src="./com_css/jqueryUI/ui/jquery.ui.widget.js"></script>
+	<script src="./com_css/jqueryUI/ui/jquery.ui.position.js"></script>
+	<script src="./com_css/jqueryUI/ui/jquery.ui.autocomplete.js"></script>
+	<script src="./com_css/js/PinYin.js"></script>
+<script type="text/javascript">
+$(function(){
+	$.metadata.setType("attr", "validate");
+	var v = $("form").validate({
+        debug: true,
+        errorPlacement: function (lable, element){
+            if (element.hasClass("l-textarea")){
+                element.ligerTip({ content: lable.html(), target: element[0] }); 
+            }
+            else if (element.hasClass("l-text-field")){
+                element.parent().ligerTip({ content: lable.html(), target: element[0] });
+            }
+            else{
+                lable.appendTo(element.parents("td:first").next("td"));
+            }
+        },
+        success: function (lable){
+            lable.ligerHideTip();
+            lable.remove();
+        },
+        submitHandler: function (target){
+        	$("form .l-text,.l-textarea").ligerHideTip();
+            ajaxUpdate();
+        }
+	});
+	
+	//渠道信息的下拉列表
+	$("#areaName").ligerComboBox({url :'areaQueryAction', isMultiSelect: false,valueField: 'areaId'});	
+	$("#areaName1").ligerComboBox({url :'areaQueryAction', isMultiSelect: false,valueField: 'areaId'});	//代理商中的区县信息
+	$("#regionCharacter").ligerComboBox({url :'selectItemQueryAction?type=canal_region_character', isMultiSelect: false});
+	$("#canalState").ligerComboBox({url :'selectItemQueryAction?type=canal_state', isMultiSelect: false});
+	$("#canalForm").ligerComboBox({
+		url :'selectItemQueryAction?type=canal_form', 
+		isMultiSelect: false,
+		onSelected: function (result){	
+			if(result == 61){
+				document.getElementById("hideParent").style.display="none";
+				document.getElementById("140").style.display="none";
+				document.getElementById("141").style.display="none";
+			}else{
+				$("#hideParent").show();
+				$("#140").show();
+				$("#141").show();
+			}
+       }
+    });
+	$("#canalProperty").ligerComboBox({url :'selectItemQueryAction?type=canal_property', isMultiSelect: false});
+	$("#canalType").ligerComboBox({url :'selectItemQueryAction?type=canal_type', isMultiSelect: false});
+	 $("#canalDept").ligerComboBox({url :'selectItemQueryAction?type=canal_dept',isMultiSelect: false});
+	$("#urbanIdetity").ligerComboBox({url :'selectItemQueryAction?type=canal_urban_idetity', isMultiSelect: false});
+	$("#distributeCard").ligerComboBox({url :'selectItemQueryAction?type=is_true', isMultiSelect: false});
+	//代理商信息的下拉列表
+	 $("#agentDept").ligerComboBox({url :'selectItemQueryAction?type=agent_dept',isMultiSelect: false});
+	 $("#agentLevel").ligerComboBox();
+	 $("#companyType").ligerComboBox({url :'selectItemQueryAction?type=company_type',isMultiSelect: false});
+	 $("#cooperationType").ligerComboBox({url :'selectItemQueryAction?type=cooperation_type',isMultiSelect: false});
+	 $("#manageModel").ligerComboBox({url :'selectItemQueryAction?type=manage_model',isMultiSelect: false});
+	 $("#payWay").ligerComboBox({url :'selectItemQueryAction?type=pay_way',isMultiSelect: false});
+	 $("#areaName").ligerComboBox({url :'areaQueryAction', isMultiSelect: false});	
+	 //代理商员工信息
+	 var canalInId = $("#canalInId").val();
+	 $("#user").ligerComboBox({
+		 url :'selectUserAction?canalInId='+canalInId,
+	     isMultiSelect: false,
+	     onSelected: function (result){	//result相当于员工工号或者CRM工号
+	    	 $.ajax({
+			      	type : "get",
+			      	url : "userDetailQuery?userId="+result,
+			      	dataType: "text",
+			      	async : false,
+			      	success : function(data){
+			      		var json =eval('('+data+')');
+			    	  	$("#userName").val(json[0].userName); $("#userNameOld").val(json[0].userName);
+			    	  	$("#userPinyin").val(json[0].userPinyin); $("#userPinyinOld").val(json[0].userPinyin);
+			    	  	$("#userNumber").val(json[0].userNumber); 
+			    	  	$("#userKind").val(json[0].userKind); $("#userKindOld").val(json[0].userKind);
+			    	  	$("#userState").val(json[0].userState); $("#userStateOld").val(json[0].userState);
+			    	  	$("#userCellphone").val(json[0].userCellphone); 	$("#userCellphoneOld").val(json[0].userCellphone);
+			    	  	$("#userIdCard").val(json[0].userIdCard); $("#userIdCardOld").val(json[0].userIdCard);
+			    	  	$("#userAuthority").val(json[0].userAuthority); $("#userAuthorityOld").val(json[0].userAuthority);
+			    	  	$("#userEmail").val(json[0].userEmail); $("#userEmailOld").val(json[0].userEmail);
+			    	  	$("#userRole").val(json[0].userRole); $("#userRoleOld").val(json[0].userRole);
+			    	  	$("#userCountId").val(json[0].userCountId); $("#userCountIdOld").val(json[0].userCountId)
+			    	  	if(json[0].userSex == "男"){
+			    	  		console.log($("#sex1").attr("checked"))
+			    	  		$("#sex1").attr("checked",true); 
+			    	  	}else if(json[0].userSex == "女"){
+			    	  		 document.getElementById("sex2").checked=true;
+			    	  	}
+			    	  	$("#userSex").val(json[0].userSex);
+			    	  	var birthday=format(json[0].userBirthday);
+			    	  	$("#userBirthday").val(birthday); 	$("#userBirthdayOld").val(birthday);
+			    	  	$("#userNativeplace").val(json[0].userNativeplace); 	$("#userNativeplaceOld").val(json[0].userNativeplace);
+			    	  	$("#userPhone").val(json[0].userPhone); $("#userPhoneOld").val(json[0].userPhone);
+			    	  	$("#userEducation").val(json[0].userEducation); $("#userEducationOld").val(json[0].userEducation);
+			    	  	$("#userCertification").val(json[0].userCertification); $("#userCertificationOld").val(json[0].userCertification);
+			    	  	$("#canalIdRelation").val(json[0].canalId);
+			    	  	var inDate=format(json[0].userInDate);
+			    	  	var outDate=format(json[0].userOutDate);
+			    	  	$("#userInDate").val(inDate); $("#userInDateOld").val(inDate);
+			    	  	$("#userOutDate").val(outDate); $("#userOutDateOld").val(outDate);
+			    	  	$("#userAddress").val(json[0].userAddress); $("#userAddressOld").val(json[0].userAddress);
+			    	  	$("#userPosition").val(json[0].userPosition); $("#userPositionOld").val(json[0].userPosition);
+			    	  	$("#userWay").val(json[0].userWay); $("#userWayOld").val(json[0].userWay);
+			    	  	$("#userRegionName").val(json[0].userEducation); $("#userRegionNameOld").val(json[0].userEducation);
+			    	  	$("#remark").val(json[0].remark); $("#remarkOld").val(json[0].remark);
+			     	 } 
+	    		});
+	      }
+	 });
+
+	 $("#userKind").ligerComboBox({url :'selectItemQueryAction?type=user_kind',isMultiSelect: false});
+	 $("#userState").ligerComboBox({url :'selectItemQueryAction?type=user_state',isMultiSelect: false}); 
+	 $("#userAuthority").ligerComboBox({url :'selectItemQueryAction?type=user_authority',isMultiSelect: false}); 
+	 $("#userWay").ligerComboBox({url :'selectItemQueryAction?type=user_way',isMultiSelect: false});
+	 $("#userRegionName").ligerComboBox({url :'areaQueryAction', isMultiSelect: false});	
+	 
+	//归属部门模糊查询
+	 $.ajax({
+			      type : "post",
+			      url : "deptQueryActionRough",
+			      data:  null,
+			      dataType: "json",
+			      async : false,
+			      success : function(data){	
+			        names = data;
+			      }
+	    });
+		//$("#canalDept").autocomplete({
+		//	source: names
+		//});
+		$("#userDept").autocomplete({
+			source: names,
+		}); 
+		
+	//归属客户经理模糊查询
+	 $.ajax({
+			      type : "post",
+			      url : "userQueryActionRough",
+			      data:  null,
+			      dataType: "json",
+			      async : false,
+			      success : function(data){	
+			        names = data;
+			      }
+	    });
+		$("#canalManager").autocomplete({
+			source: names
+		});
+		//归属代理商模糊查询
+		 $.ajax({
+				      type : "post",
+				      url : "agentNameQueryActionRough",
+				      data:  null,
+				      dataType: "json",
+				      async : false,
+				      success : function(data){	
+				        names = data;
+				      }
+		    });
+			$("#agentName").autocomplete({
+				source: names,
+				select : function(e, ui) {	
+					$("#agentId").val(ui.item.id);
+				}
+			});
+		
+	$("#form1").ligerForm();$("#form2").ligerForm();$("#form3").ligerForm();
+	  var myUrlHead = 'scanImgUploadAction';
+               // alert(myUrlHead);
+      		 $("#myFileHead").uploadify({
+                    'uploader' : './com_css/uploadify/uploadify.swf',
+                    'script' :myUrlHead ,//后台处理的请求
+                    'cancelImg' : './com_css/uploadify/cancel.png',
+                    'fileDataName':'myFileHead',//服务器端根据这个接收文件
+                    'queueID' : 'fileQueueHead',// 文件队列的ID，该ID与存放文件队列的div的ID一致
+                    'queueSizeLimit' : 5,//当允许多文件生成时，设置选择文件的个数
+                    'fileDesc' : '请选择 gif,bmp,png,jpeg,jpg文件类型',//用来设置选择文件对话框中的提示文本
+                    'fileExt' : '*.gif;*.bmp;*.png;*.jpeg;*.jpg', //控制可上传文件的扩展名，启用本项时需同时声明fileDesc
+                    'auto' : false,//false需要点击上传按钮才上传
+                    'multi' : true,//可以上传多个文件
+                    'simUploadLimit' :1,//允许同时上传的个数 
+                    'buttonText' : '浏览文件',
+                    'onCancel':function(event,queueId,fileObj,data){},
+                    'onError' : function(event, queueID, fileObj, errorObj) {
+                        alert(" 上传失败" + errorObj.info + "错误类型" + errorObj.type);
+                    },
+                    'onComplete' : function(event, queueID, fileObj, response, data) {
+                    	var resultArray=response.split("@"); 
+                    	if(resultArray[0] == 'success'){
+                    		alert("上传成功");
+                    		$("#guaranteeReceiptScanUrl").val(resultArray[2]+';'+$("#guaranteeReceiptScanUrl").val());
+                    	}else{
+                    		alert(response);
+                    	} 	
+                    }
+                });  
+});
+
+</script>
+</head>
+<style type="text/css">
+*{margin:0;padding:0;}
+body{font-size:12x;background:#f9fbfc;font-family:"微软雅黑"} 
+li{list-style:none;}
+.menu{width:980px;height:40px;color: #fff;background: #05a;font-size:20px;
+padding-left:10px;padding-right:10px;padding-top: 4px;font-weight:bold;}
+.menu li{display:inline-block;width:240px;height:40px;line-height:40px;text-align:center;}
+.menu li:hover{color: black;}
+.active{color: #222;background:#F0F0F0;}
+.div{width:996px;border:2px #ddd solid;border-top:none;display:none;min-height:200px;padding-top:10px;}
+ input,button{font-family: "微软雅黑";}
+.hehe{text-align:right;}
+.l-table-edit-td{ padding:2px;}
+.l-button-submit{width:80px; float:left; margin-left:50px; padding-bottom:2px;} 
+.btn,#btn{width:240px;height:40px;background:#0051a1;color:#FFF;border:none; border-radius:2em;font-size: 18px;font-family:"微软雅黑";margin:30px 0px;}
+.reg{padding:0px 40px;}
+.reg h3{font-size:20px;color: #0051a1;font-weight:normal;}
+.reg p{padding-top:6px;}
+.div h2{font-weight:normal;font-size:20px;text-align:center;padding:16px 0;
+  color:#05a;clear:both;border-top:1px solid #ddd;}
+#abc{width:800px;margin:0 auto;padding: 0px 50px;}
+#abc li{width:400px;float:left;line-height:1.6;}
+#abc span{color:blue;}
+.pb30{padding-bottom:30px;}
+  </style>
+  <script type="text/javascript">
+function getElementsByClassName(className,tagName){
+    var ele=[],all=document.getElementsByTagName(tagName||"*");
+    for(var i=0;i<all.length;i++){
+        if(all[i].className==className){
+             ele[ele.length]=all[i];
+        }
+    }
+    return ele;
+}
+
+$(function(){
+	var oUl=$("#menu");
+	var aLi=oUl.find("li");
+	var aDiv=$(".div");
+	var aBtn=$(".btn");
+	var form=$("#form1")
+	var arr=[[],[],[],[]];
+
+	for(var i=0,len=aLi.length;i<len;i++){
+	    aLi[i].index=i;
+	    if(i!==aLi.length-1){
+	      aLi[i].onclick=function(){
+	          for(var i=0;i<4;i++){
+	              aDiv[i].style.display="none";
+	              aLi[i].className="";
+	          }
+	          this.className="active";
+	          aDiv[this.index].style.display="block";
+
+	      }
+	    }else{
+	      aLi[i].onclick=function(){
+	          
+	          for(var i=0;i<4;i++){
+	              aDiv[i].style.display="none";
+	              aLi[i].className="";
+	          }
+	          this.className="active";
+	          aDiv[this.index].style.display="block";
+	          getTotal();
+
+
+	      }
+	    }
+	      
+	}	
+});
+function getTotal(){
+	var state = $("#state").val();
+	var str="<img src='./images/warning.png'> <b style='color:red'>请填写正确信息!</b>";
+	 $("#branchCompany").val()  ?  $("#1").html( $("#branchCompany").val()) : $("#1").html(str);
+	$("#2").html( $("#agentId1").val());
+	$("#agentName1").val() ? $("#3").html( $("#agentName1").val()) : $("#3").html(str);
+	$("#agentShortName").val() ? $("#4").html( $("#agentShortName").val()) : $("#4").html(str);
+	$("#agentDept").val() ? $("#5").html( $("#agentDept").val()) : $("#5").html(str);
+	$("#agentLevel").val() ? $("#6").html( $("#agentLevel").val()) : $("#6").html(str);
+	$("#companyType").val() ? $("#7").html( $("#companyType").val()) : $("#7").html(str);
+	$("#cooperationType").val() ? $("#8").html( $("#cooperationType").val()) : $("#8").html(str);
+	$("#legalPerson").val() ? $("#9").html( $("#legalPerson").val()) : $("#9").html(str);
+	$("#legalPhone").val() ? $("#10").html( $("#legalPhone").val()):$("#10").html(str);
+	$("#legalCardType").val() ? $("#11").html( $("#legalCardType").val()):$("#11").html(str);
+	$("#legalIdCard").val() ? $("#12").html( $("#legalIdCard").val()):$("#12").html(str);
+	$("#manageModel").val() ? $("#13").html( $("#manageModel").val()):$("#13").html(str);
+	$("input:radio[name='is11888Card'][checked]").val() ? $("#14").html( $("input:radio[name='is11888Card'][checked]").val()):$("#14").html(str);
+	$("#ondutyPerson").val() ? $("#15").html( $("#ondutyPerson").val()):$("#15").html(str);
+	$("#ondutyPersonPhone").val() ? $("#16").html( $("#ondutyPersonPhone").val()):$("#16").html(str);
+	$("#startBank").val() ? $("#17").html( $("#startBank").val()):$("#17").html(str);
+	$("#bankAccountId").val() ? $("#18").html( $("#bankAccountId").val()):$("#18").html(str);
+	
+	$("#19").html ( $("#parentId").val());$("#20").html( $("#parentName").val());$("#21").html( $("#companyAddress").val());
+	$("#22").html( $("#ondutyPersonAddress").val());$("#23").html( $("#ondutyPersonQqnum").val());$("#24").html( $("#postCode").val());
+	$("#25").html( $("#agentFax").val());$("#26").html( $("#agentEmail").val());$("#27").html( $("#payWay").val());
+	$("#28").html( $("#bankAccountName").val());$("#29").html( $("#weituoStartBank").val());$("#30").html( $("#weituoBankAccount").val());
+	$("#31").html( $("#weituoBankName").val());$("#32").html( $("#payObject").val());$("#33").html( $("#registerMoney").val());
+	$("#34").html( $("#registerDate").val());$("#35").html( $("#businessLicenseId").val());$("#36").html( $("#taxRegisteId").val());
+	$("#37").html ( $("#bankPermisionId").val());$("#38").html( $("#organizationCodeId").val());$("#39").html( $("#agentName").val());
+	$("#40").html( $("#agentId").val());
+	
+	$("#canalName").val() ? $("#41").html( $("#canalName").val()) : $("#41").html(str);
+	$("#areaName").val() ? $("#42").html( $("#areaName").val()) : $("#42").html(str);
+	$("#canalForm").val() ? $("#43").html( $("#canalForm").val()) : $("#43").html(str);
+	$("#canalProperty").val() ? $("#44").html( $("#canalProperty").val()) : $("#44").html(str);
+	$("#canalType").val() ? $("#45").html( $("#canalType").val()) : $("#45").html(str);
+	$("#regionCharacter").val() ? $("#46").html( $("#regionCharacter").val()) : $("#46").html(str);
+	$("#canalAddress").val() ? $("#47").html( $("#canalAddress").val()) : $("#47").html(str);
+	
+	$("#48").html( $("#canalParentName").val());$("#49").html( $("#canalParentId").val());
+	$("#50").html( $("#canalManager").val());
+	
+	$("#canalDept").val() ? $("#51").html( $("#canalDept").val()) : $("#51").html(str);
+	$("#canalUserName").val() ? $("#52").html( $("#canalUserName").val()) : $("#52").html(str);
+	$("#canalUserPhone").val() ? $("#53").html( $("#canalUserPhone").val()) : $("#53").html(str);
+	
+	$("#54").html( $("#canalIdCard").val());
+	
+	$("#urbanIdetity").val() ? $("#55").html( $("#urbanIdetity").val()) : $("#55").html(str);
+	$("#expireType").val() ? $("#56").html( $("#expireType").val()) : $("#56").html(str);
+	$("#businessArea").val() ? $("#57").html( $("#businessArea").val()) : $("#57").html(str);
+	$("#rentMoney").val() ? $("#58").html( $("#rentMoney").val()) : $("#58").html(str);
+	$("#rentStartDate").val() ? $("#59").html( $("#rentStartDate").val()) : $("#59").html(str);
+	$("#rentEndDate").val() ? $("#60").html( $("#rentEndDate").val()) : $("#60").html(str);
+	
+	$("#61").html( $("#allowancePolicy").val());
+	
+	$("#firstRentAllowance").val() ? $("#62").html( $("#firstRentAllowance").val()) : $("#62").html(str);
+	$("#firstDecorationAllowance").val() ? $("#63").html( $("#firstDecorationAllowance").val()) : $("#63").html(str);
+
+	$("#64").html( $("#houseOwnerName").val());
+	$("#65").html( $("#houseOwnerPhone").val());$("#66").html( $("#distributeCard").val());$("#67").html( $("#inBankAccount").val());
+	$("#68").html( $("#inBankAccountNumber").val());$("#69").html( $("#inBankName").val());$("#70").html( $("#inCollectNumber").val());
+	$("#71").html( $("#inPersonIdCard").val());$("#72").html( $("#guaranteeAmount").val());$("#73").html( $("#guaranteeUser").val());
+	$("#74").html( $("#guaranteeTime").val());$("#75").html( $("#myFileHead").val());
+	
+	$("#userName").val() ? $("#76").html( $("#userName").val()) : $("#76").html(str);
+	$("#userKind").val() ? $("#79").html( $("#userKind").val()) : $("#79").html(str);
+	$("input:radio[name='userSex'][checked]").val() ? $("#87").html( $("input:radio[name='userSex'][checked]").val()) : $("#87").html(str);
+	
+	$("#77").html( $("#userPinyin").val());$("#80").html( $("#userState").val());
+	$("#82").html( $("#userIdCard").val());$("#83").html( $("#userAuthority").val());$("#84").html( $("#userEmail").val());
+	$("#85").html( $("#userRole").val());$("#86").html( $("#userCountId").val());
+	$("#88").html( $("#userBirthday").val());$("#89").html( $("#userNativeplace").val());$("#90").html( $("#userPhone").val());
+	$("#91").html( $("#userEducation").val());$("#92").html( $("#userCertification").val());$("#93").html( $("#userInDate").val());
+	$("#94").html( $("#userOutDate").val());$("#95").html( $("#userAddress").val());$("#96").html( $("#userPosition").val());
+	$("#97").html( $("#userWay").val());$("#98").html( $("#userRegionName").val());$("#99").html( $("#remark").val());
+}
+function format(time) {
+	var year=time.year+1900;
+	var month=time.month+1;
+	var date=time.date;
+	var str=year+"-"+month+"-"+date;
+	return str;
+}
+function alamTxt(id,txtContext){
+		$("#"+id).ligerTip({ content: txtContext, width: 150 });
+}
+
+function removeAlamTxt(id){
+		$("#"+id).ligerHideTip();
+}
+</script>
+<body style="padding:15px;">
+<ul class="menu" id="menu">
+    <li class="active">代理商信息</li>
+    <li>渠道信息</li>
+    <li>渠道员工信息</li>
+    <li >信息汇总</li>
+</ul>
+<form action="" method="post" name = "form1" id = "form1">
+<div class="div" style="display:block;">
+    <table border="0" cellspacing="20" class="l-table-edit">            
+       <tr >
+        <td class="hehe"  width="170px">工单号：</td>
+        <td class="l-table-edit-td"  width="130px">
+        	<input name="inId" type="text" id="agentInId" value="${request.canalInId }"  readonly="readonly"/>
+        </td>
+        <td  width="150px"></td>
+       <td class="hehe" width="170px"></td>
+        <td class="l-table-edit-td" width="130px"></td>
+        <td width="150px"></td>
+      </tr>
+      <tr >
+        <td class="hehe"  width="170px"><font color="red" size="4">*</font>分公司：</td>
+        <td class="l-table-edit-td"  width="130px">
+        	<input type="text" ltype="text" id="branchCompany" name="branchCompany"  value="${request.branchCompany }" onfocus="alamTxt('branchCompany','厅店所属分公司')" onblur="removeAlamTxt('branchCompany')" />
+        	<input type="hidden" ltype="text"  name="branchCompanyOld"  value="${request.branchCompany }" />
+        </td>
+        <td  width="150px"></td>
+       <td class="hehe" width="170px">代理商编码：</td>
+        <td class="l-table-edit-td" width="130px">
+        	<input type="text"   ltype="text"  id="agentId1" name="agentId1" value="${request.agentId }"  readonly="readonly" />
+        </td>
+        <td width="150px"></td>
+      </tr>
+      <tr >
+        <td class="hehe"><font color="red" size="4">*</font>代理商名称：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="agentName1" name="agentName1"  value="${request.agentName }" onfocus="alamTxt('agentName1','厅店名称')" onblur="removeAlamTxt('agentName1')"/>
+        	<input type="hidden"  ltype="text"  name="agentName1Old"  value="${request.agentName }" />
+        </td>
+        <td></td>
+        <td class="hehe">代理商简称：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text" id="agentShortName" name="agentShortName" value="${request.agentShortName }" onfocus="alamTxt('agentShortName','厅店名称简称')" onblur="removeAlamTxt('agentShortName')" />
+        	<input type="hidden"   ltype="text" name="agentShortNameOld" value="${request.agentShortName }" />
+        </td>
+        <td></td>
+      </tr>
+      <tr >
+        <td class="hehe"><font color="red" size="4">*</font>管理部门：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="agentDept" name="agentDept" value="${request.agentDept }" onchange="getAgentLevel()"  />
+        	<input type="hidden"  ltype="text"  name="agentDeptOld" value="${request.agentDept }" />
+        </td>
+        <td ></td>
+        <td class="hehe"><font color="red" size="4">*</font>代理商级别：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="agentLevel" name="agentLevel" value="${request.agentLevel }" />
+        	<input type="hidden"  ltype="text" name="agentLevelOld" value="${request.agentLevel }" />
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="hehe"><font color="red" size="4">*</font>公司类型：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="companyType" name="companyType" value="${request.companyType }" />
+        	<input type="hidden"  ltype="text"  name="companyTypeOld" value="${request.companyType }" />
+        </td>
+        <td></td>
+        <td class="hehe"><font color="red" size="4">*</font>合作伙伴类型：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="cooperationType" name="cooperationType" value="${request.cooperationType }" />
+        	<input type="hidden"  ltype="text"   name="cooperationTypeOld" value="${request.cooperationType }" />
+        </td>
+        <td></td>
+      </tr>
+      
+      <tr>
+        <td class="hehe"><font color="red" size="4">*</font>法人代表：</td>
+        <td  class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="legalPerson" name="legalPerson"  value="${request.legalPerson }" />
+        	<input type="hidden"  ltype="text"  name="legalPersonOld"  value="${request.legalPerson }" />
+        </td>
+        <td></td>
+        <td class="hehe"><font color="red" size="4">*</font>法人代表联系电话：</td>
+        <td  class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="legalPhone" name="legalPhone" value="${request.legalPhone }" onblur="checklegal('legalPhone')"  onfocus="alamTxt('legalPhone','厅店法人代表联系电话')" onblur="removeAlamTxt('legalPhone')" />
+       		<input type="hidden"  ltype="text"  name="legalPhoneOld" value="${request.legalPhone }" />
+        </td>
+        <td></td>
+      </tr>
+      <tr >
+        <td class="hehe"><font color="red" size="4">*</font>法人证件类型：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="legalCardType" name="legalCardType" value="${request.legalCardType }" />
+        	<input type="hidden"  ltype="text"  name="legalCardTypeOld" value="${request.legalCardType }" />
+        </td>
+        <td></td>
+        <td class="hehe"><font color="red" size="4">*</font>法人证件号码：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text" id="legalIdCard" name="legalIdCard" value="${request.legalIdCard }"  />
+        	<input type="hidden"   ltype="text" name="legalIdCardOld" value="${request.legalIdCard }"  />
+        </td>
+        <td></td>
+      </tr>
+      <tr >
+        <td class="hehe"><font color="red" size="4">*</font>管理模式：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="manageModel" name="manageModel" value="${request.manageModel }"  />
+        	<input type="hidden"  ltype="text" name="manageModelOld" value="${request.manageModel }"  />
+        </td>
+        <td></td>
+        <td class="hehe"><font color="red" size="4">*</font>是否发11888卡：</td>
+        <td class="l-table-edit-td">
+            <input type="radio" name="is11888Card" value="是"  
+            	<c:if test="${is11888Card=='是' }">checked="checked"</c:if>
+            />是&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="is11888Card" value="否"  
+            	<c:if test="${is11888Card=='否' }">checked="checked"</c:if>
+            />否</td>
+        <td><input type="hidden" name="is11888CardOld" value="${request.is11888Card}" /></td>
+      </tr>
+     <tr>
+        <td class="hehe"><font color="red" size="4">*</font>负责人姓名：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="ondutyPerson" name="ondutyPerson" value="${request.ondutyPerson }" />
+        	<input type="hidden"  ltype="text" name="ondutyPersonOld" value="${request.ondutyPerson }" />
+        </td>
+        <td></td>
+        <td class="hehe"><font color="red" size="4">*</font>负责人联系电话：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="ondutyPersonPhone" name="ondutyPersonPhone" value="${request.ondutyPersonPhone }" onblur="checklegal('ondutyPersonPhone')"  />
+        	<input type="hidden"  ltype="text"  name="ondutyPersonPhoneOld" value="${request.ondutyPersonPhone }" />
+        </td>
+        <td></td>
+      </tr>
+      <tr >
+        <td class="hehe"><font color="red" size="4">*</font>开户银行：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text" id="startBank" name="startBank" value="${request.startBank }" />
+        	<input type="hidden"   ltype="text" name="startBankOld" value="${request.startBank }" />
+        </td>
+        <td></td>
+        <td class="hehe"><font color="red" size="4">*</font>银行账号：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="bankAccountId" name="bankAccountId" value="${request.bankAccountid }" />
+        	<input type="hidden"  ltype="text" name="bankAccountIdOld" value="${request.bankAccountid }" />
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="hehe">上级合作伙伴编码：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="parentId" name="parentId"  value="${request.parentId }" />
+        	<input type="hidden"  ltype="text" name="parentIdOld"  value="${request.parentId }" />
+        </td>
+        <td></td>
+        <td class="hehe">上级合作伙伴名称：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="parentName" name="parentName" value="${request.parentName }" />
+        	<input type="hidden"  ltype="text"  name="parentNameOld" value="${request.parentName }" />
+        </td>
+        <td></td>
+      </tr>
+      <tr >
+        <td class="hehe">公司办公地址：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text" id="companyAddress" name="companyAddress" value="${request.companyAddress }" />
+        	<input type="hidden"   ltype="text" name="companyAddressOld" value="${request.companyAddress }" />
+        </td>
+        <td></td>
+        <td class="hehe">负责人联系地址：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="ondutyPersonAddress" name="ondutyPersonAddress" value="${request.ondutyPersonAddress }" />
+        	<input type="hidden"  ltype="text"  name="ondutyPersonAddressOld" value="${request.ondutyPersonAddress }" />
+        </td>
+        <td></td>
+      </tr>
+      <tr >
+        <td class="hehe">负责人QQ：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="ondutyPersonQqnum" name="ondutyPersonQqnum" value="${request.ondutyPersonQqnum }" onblur="checklegal('ondutyPersonQqnum')"   />
+       		<input type="hidden"  ltype="text"   name="ondutyPersonQqnumOld" value="${request.ondutyPersonQqnum }" />
+        </td>
+        <td></td>
+        <td class="hehe">邮政编码：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text" id="postCode" name="postCode" value="${request.postCode }" onblur="checklegal('postCode')" />
+        	<input type="hidden"   ltype="text" name="postCodeOld" value="${request.postCode }" />
+        </td>
+        <td></td>
+      </tr >
+      <tr>
+        <td class="hehe">传真：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="agentFax" name="agentFax" value="${request.agentFax }" onblur="checklegal('agentFax')" />
+        	<input type="hidden"  ltype="text"  name="agentFaxOld" value="${request.agentFax }" />
+        </td>
+        <td></td>
+        <td class="hehe">电子邮箱：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text" id="agentEmail" name="agentEmail" value="${request.agentEmail }" onblur="checklegal('agentEmail')" />
+       		<input type="hidden"   ltype="text"  name="agentEmailOld" value="${request.agentEmail }" />
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="hehe">付款方式：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="payWay" name="payWay" value="${request.payWay }" />
+        	<input type="hidden"  ltype="text" name="payWayOld" value="${request.payWay }" />
+        </td>
+        <td></td>
+        <td class="hehe">银行账户名称：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text" id="bankAccountName" name="bankAccountName" value="${request.bankAccountName }" />
+        	<input type="hidden"   ltype="text" name="bankAccountNameOld" value="${request.bankAccountName }" />
+        </td>
+        <td></td>
+      </tr>
+      <tr >
+        <td class="hehe">委托收款方开户银行：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="weituoStartBank" name="weituoStartBank" value="${request.weituoStartBank }" />
+        	<input type="hidden"  ltype="text"  name="weituoStartBankOld" value="${request.weituoStartBank }" />
+        </td>
+        <td></td>
+        <td class="hehe">委托收款方帐号：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="weituoBankAccount" name="weituoBankAccount" value="${request.weituoBankAccount }"  />
+        	<input type="hidden"  ltype="text"  name="weituoBankAccountOld" value="${request.weituoBankAccount }"  />
+        </td>
+        <td></td>
+      </tr>
+      <tr >
+        <td class="hehe">委托收款方名称：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text" id="weituoBankName" name="weituoBankName"  value="${request.weituoBankName }" />
+        	<input type="hidden"   ltype="text"  name="weituoBankNameOld"  value="${request.weituoBankName }" />
+        </td>
+        <td></td>
+        <td class="hehe">支付对象：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="payObject" name="payObject"  value="${request.payObject }" />
+        	<input type="hidden"  ltype="text"  name="payObjectOld"  value="${request.payObject }" />
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="hehe">注册资本：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text" id="registerMoney" name="registerMoney" value="${request.registerMoney }"  onblur="checklegal('registerMoney')" />
+        	<input type="hidden"   ltype="text"  name="registerMoneyOld" value="${request.registerMoney }"  />
+        </td>
+        <td><font color="blue" size="2">(万元)</font></td>
+        <td class="hehe">工商登记时间：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="registerDate" name="registerDate" value="${request.registerDate }" />
+        	<input type="hidden"  ltype="text"  name="registerDateOld" value="${request.registerDate }" />
+        </td>
+        <td></td>
+      </tr>
+      <tr >
+        <td class="hehe">法人营业执照编号：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="businessLicenseId" name="businessLicenseId" value="${request.businessLicenceId }" />
+        	<input type="hidden"  ltype="text"   name="businessLicenseIdOld" value="${request.businessLicenceId }" />
+        </td>
+        <td></td>
+        <td class="hehe">税务登记证编号：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="taxRegisteId" name="taxRegisteId" value="${request.taxRegisteId }" />
+        	<input type="hidden"  ltype="text"  name="taxRegisteIdOld" value="${request.taxRegisteId }" />
+        </td>
+        <td></td>
+      </tr >
+      <tr >
+        <td class="hehe">银行开户许可证编号：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="bankPermisionId" name="bankPermisionId"  value="${request.bankPermisionId }" />
+        	<input type="hidden"  ltype="text"  name="bankPermisionIdOld"  value="${request.bankPermisionId }" />
+        </td>
+        <td></td>
+        <td class="hehe">组织机构代码证编号：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text" id="organizationCodeId" name="organizationCodeId" value="${request.organizationCodeId }" />
+        	<input type="hidden"   ltype="text" name="organizationCodeIdOld" value="${request.organizationCodeId }" />
+        </td>
+        <td></td>
+    </table>
+</div>
+<div class="div">
+    <table border="0" cellspacing="20" class="l-table-edit">         
+               <tr>
+                    <td class="hehe" width="170px">工单号：</td>
+                    <td class="l-table-edit-td" width="130px">
+                    	<input name="inId" ltype="text" type="text" id="canalInId" readonly="readonly" value="${request.canalInId }"  />
+                    </td>
+                    <td width="150px"></td>
+                    <td class="hehe" width="170px">渠道编码：</td>
+                    <td class="l-table-edit-td" width="130px"><input name="canalId" ltype="text" type="text" id="canalId" readonly="readonly" value="${request.canalId }"  /></td>
+                    <td width="150px"></td>
+                </tr>
+                <tr>
+                    <td class="hehe" width="170px"><font color="#ff0000">* </font>渠道申请名称：</td>
+                    <td class="l-table-edit-td" width="130px">
+                    	<input name="canalName" type="text" id="canalName" ltype="text" value="${request.canalName }"  />
+                    	<input name="canalNameOld" type="hidden" ltype="text" value="${request.canalName }" />
+                    </td>
+                    <td width="150px"></td>
+                    <td class="hehe" width="170px"><font color="#ff0000">* </font>区域名称：</td>
+                    <td class="l-table-edit-td" width="130px">
+                    	<input name="areaName" type="text" id="areaName" ltype="text"  value="${request.areaName }"/>
+                    	<input name="areaNameOld" type="hidden"  value="${request.areaName }"/>
+                    </td>
+                    <td width="150px"></td>
+                </tr>
+                
+                <tr>
+                    <td class="hehe"><font color="#ff0000">* </font>渠道形态：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="canalForm" type="text" ltype="text" id="canalForm"  value="${request.canalForm }" onblur="showParents()"/>
+                    	<input name="canalFormOld" type="hidden"  value="${request.canalForm }" />
+                    </td>
+                    <td ></td>
+                     <td class="hehe"><font color="#ff0000">* </font>渠道性质：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="canalProperty" type="text" ltype="text" id="canalProperty"  value="${request.canalProperty }" />
+                    	<input name="canalPropertyOld" type="hidden" value="${request.canalProperty }" />
+                    </td>
+                    <td ></td>
+                </tr>
+                <tr>
+                    <td class="hehe"><font color="#ff0000">* </font>渠道类型：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="canalType"  type="text" id="canalType" ltype="text" value="${request.canalType }" />
+                    	<input name="canalTypeOld"  type="hidden"  value="${request.canalType }" />
+                    </td>
+                    <td ></td>
+                    <td class="hehe"><font color="#ff0000">* </font>区域特征：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="regionCharacter" ltype="text" type="text" id="regionCharacter"  value="${request.regionCharacter }"/>
+                    	<input name="regionCharacterOld" ltype="text" type="hidden"  value="${request.regionCharacter }"/>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="hehe"><font color="#ff0000">* </font>渠道地址：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="canalAddress" ltype="text" type="text" id="canalAddress" value="${request.canalAddress }"  />
+                    	<input name="canalAddressOld" ltype="text" type="hidden" value="${request.canalAddress }"  />
+                    </td>
+                    <td ></td>
+                    <td class="hehe">所属渠道客户经理：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="canalManager"  ltype="text" type="text" id="canalManager"  value="${request.canalManager }" />
+                        <input name="canalManagerOld"  ltype="text" type="hidden"  value="${request.canalManager }" />
+                        <input name="canalManagerId" type="hidden" id="canalManagerId" /></td>
+                    <td align="left"><font color="blue" size="2">（模糊查询）</font></td>
+                </tr>
+                <tr id="hideParent">
+                    <td class="hehe">归属上级渠道名称：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="canalParentName" ltype="text" type="text" id="canalParentName" value="${request.canalParentName }" />
+                    	<input name="canalParentNameOld" ltype="text" type="hidden" value="${request.canalParentName }" />
+                    </td>
+                    <td ></td>
+                    <td class="hehe">归属上级渠道编码：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="canalParentId" type="text"  ltype="text" id="canalParentId" value="${request.canalParentId }" />
+                    	<input name="canalParentIdOld" type="hidden"  ltype="text"  value="${request.canalParentId }" />
+                    </td>
+                    <td ></td>
+                </tr>
+                <tr>
+                    <td class="hehe"><font color="#ff0000">* </font>渠道归属部门：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="canalDept" type="text" ltype="text" id="canalDept" value="${request.canalDept }" />
+                    	<input name="canalDeptOld" type="hidden" ltype="text"  value="${request.canalDept }" />
+                    </td>
+                    <td align="left"><font color="blue" size="2">（模糊查询）</font></td>
+                    <td class="hehe"></td>
+                    <td class="l-table-edit-td"></td>
+                    <td></td>
+                </tr>           
+                
+                <tr>
+                    <td class="hehe"><font color="#ff0000">* </font>负责人：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="canalUserName" ltype="text"  type="text" id="canalUserName" value="${request.canalUserName }" />
+                    	<input name="canalUserNameOld" ltype="text"  type="hidden" value="${request.canalUserName }"  />
+                    </td>
+                    <td ></td>
+                    <td class="hehe"><font color="#ff0000">* </font>联系电话：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="canalUserPhone" type="text" ltype="text" id="canalUserPhone" value="${request.canalUserPhone }"  onblur="check()"/>
+                    	<input name="canalUserPhoneOld" type="hidden" ltype="text"  value="${request.canalUserPhone }" />
+                    </td>
+                    <td ></td>
+                </tr>
+                <tr>
+                    <td class="hehe">身份证号码：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="canalIdCard" type="text"  ltype="text" id="canalIdCard"  value="${request.canalIdCard }" onblur="check()"/>
+                    	<input name="canalIdCardOld" type="hidden"  ltype="text"   value="${request.canalIdCard }" />
+                    </td>
+                    <td ></td>
+                     <td class="hehe"><font color="#ff0000">* </font>城乡标识：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="urbanIdetity" type="text" ltype="text" id="urbanIdetity" value="${request.urbanIdetity }"  />
+                    	<input name="urbanIdetityOld" type="hidden" ltype="text" value="${request.urbanIdetity }"  />
+                    </td>
+                    <td ></td>
+                </tr>
+                <tr>
+                    <td class="hehe"><font color="#ff0000">* </font>产权归属：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="expireType" type="text"  ltype="text" id="expireType" value="${request.expireType }"  />
+                    	<input name="expireTypeOld" type="hidden"  ltype="text"  value="${request.expireType }"  />
+                    </td>
+                    <td ></td>
+                     <td class="hehe"><font color="#ff0000">* </font>营业面积：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="businessArea" type="text"  ltype="text" id="businessArea" value="${request.businessArea }"  ltype='spinner' ligerui="{type:'float'}" onblur="check()" />
+                    	<input name="businessAreaOld" type="hidden"  ltype="text"  value="${request.businessArea }" />
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="hehe"><font color="#ff0000">* </font>月租金额：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="rentMoney" type="text" ltype="text" id="rentMoney" value="${request.rentMoney }"  ltype='spinner' ligerui="{type:'float'}" onblur="check()" />
+                    	<input name="rentMoneyOld" type="hidden" ltype="text"  value="${request.rentMoney }" />
+                    </td>
+                    <td ></td>
+                    <td class="hehe"><font color="#ff0000">* </font>房租合同开始时间：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="rentStartDate" type="text" ltype="text" id="rentStartDate" value="${request.rentStartDate }"/>
+                    	<input name="rentStartDateOld" type="hidden" ltype="text"  value="${request.rentStartDate }"/>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="hehe"><font color="#ff0000">* </font>房租合同结束时间：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="rentEndDate"   type="text" ltype="text" id="rentEndDate" value="${request.rentEndDate }" />
+                    	<input name="rentEndDateOld"   type="hidden" ltype="text" value="${request.rentEndDate }" />
+                    </td>
+                    <td ></td>
+                     <td class="hehe">合同期补贴政策：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="allowancePolicy" type="text" ltype="text" id="allowancePolicy" value="${request.allowancePolicy }" />
+                  		<input name="allowancePolicyOld" type="hidden" ltype="text"  value="${request.allowancePolicy }" />
+                   </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="hehe"><font color="#ff0000">* </font>首期房租补贴(元/月)：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="firstRentAllowance" type="text" ltype="text" id="firstRentAllowance"  ltype='spinner' ligerui="{type:'float'}" onblur="check()" value="${request.firstRentAllowance }"/>
+                    	<input name="firstRentAllowanceOld" type="hidden" ltype="text"  value="${request.firstRentAllowance }"/>
+                    </td>
+                    <td ></td>
+                     <td class="hehe"><font color="#ff0000">* </font>首期装修补贴金额(元/月)：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="firstDecorationAllowance" ltype="text" type="text" id="firstDecorationAllowance"  ltype='spinner' ligerui="{type:'float'}" onblur="check()" value="${request.firstDecorationAllowance }"/>
+                   		<input name="firstDecorationAllowanceOld" ltype="text" type="hidden"  value="${request.firstDecorationAllowance }"/>
+                    </td>
+                    <td ></td>
+                </tr>
+                <tr>
+                    <td class="hehe">房产权所有人姓名：</td>
+                    <td class="l-table-edit-td">
+                   		<input name="houseOwnerName" type="text" ltype="text" id="houseOwnerName" value="${request.houseOwnerName }" />
+                   		<input name="houseOwnerNameOld" type="hidden" ltype="text"  value="${request.houseOwnerName }" />
+                   	</td>
+                    <td ></td>
+                    <td class="hehe">房产权所有人电话：</td>
+                    <td class="l-table-edit-td">
+                   		<input name="houseOwnerPhone" type="text" ltype="text" id="houseOwnerPhone"  onblur="check()" value="${request.houseOwnerPhone }" />
+                   		<input name="houseOwnerPhoneOld" type="hidden" ltype="text"  value="${request.houseOwnerPhone }" />
+                   	</td>
+                    <td ></td>
+                </tr>
+                <tr>
+                    <td class="hehe">是否发卡网点： </td>
+                    <td class="l-table-edit-td">
+                    	<input name="distributeCard" type="text" ltype="text" id="distributeCard"  onblur="check()" value="${request.distributeCard}"/>
+                    	<input name="distributeCardOld" type="hidden" ltype="text"  value="${request.distributeCard}"/>
+                    </td>
+                    <td ></td>
+                     <td class="hehe">开户人身份证号：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="inPersonIdCard" type="text" ltype="text" id="inPersonIdCard" value="${request.inPersonIdCard }" onblur="check()" />
+                    	<input name="inPersonIdCardOld" type="hidden" ltype="text"  value="${request.inPersonIdCard }"  />
+                    </td>
+                    <td ></td>
+                </tr>
+                
+                <tr>
+                    <td class="hehe">营收资金银行账号：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="inBankAccount" type="text"  ltype="text" id="inBankAccount" value="${request.inBankAccount }" />
+                    	<input name="inBankAccountOld" type="hidden"  ltype="text"  value="${request.inBankAccount }" />
+                    </td>
+                    <td ></td>
+                    <td class="hehe">开户号：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="inBankAccountNumber" type="text"  ltype="text" id="inBankAccountNumber" value="${request.inBankAccountNumber }" />
+                    	<input name="inBankAccountNumberOld" type="hidden"  ltype="text"  value="${request.inBankAccountNumber }" />
+                    </td>
+                    <td ></td>
+                </tr>
+                <tr>
+                    <td class="hehe">开户银行名：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="inBankName" type="text"  ltype="text" id="inBankName" value="${request.inBankName }" />
+                    	<input name="inBankNameOld" type="hidden"  ltype="text" value="${request.inBankName }" />
+                    </td>
+                    <td ></td>
+                    <td class="hehe">归集账号：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="inCollectNumber" type="text"  ltype="text" id="inCollectNumber" value="${request.inCollectNumber }" />
+                    	<input name="inCollectNumberOld" type="hidden"  ltype="text"  value="${request.inCollectNumber }" />
+                    </td>
+                    <td ></td>
+                </tr>
+                <tr>
+                    <td class="hehe">保证金金额：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="guaranteeAmount" type="text" id="guaranteeAmount" ltype='spinner' ligerui="{type:'float'}" onblur="check()" value="${request.guaranteeAmount }"/>
+                    	<input name="guaranteeAmountOld" type="hidden" ltype="text"  value="${request.guaranteeAmount }"/>
+                    </td>
+                    <td ></td>
+                    <td class="hehe">保证金办理人：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="guaranteeUser" type="text" ltype="text" id="guaranteeUser"  value="${request.guaranteeUser }" />
+                    	<input name="guaranteeUserOld" type="hidden" ltype="text"   value="${request.guaranteeUser }" />
+                    </td>
+                    <td ></td>
+                </tr>
+                <tr>
+                    <td class="hehe">办理时间：</td>
+                    <td class="l-table-edit-td">
+                    	<input name="guaranteeTime" type="text"  ltype="text" id="guaranteeTime" value="${request.guaranteeTime }" />
+                    	<input name="guaranteeTimeOld" type="hidden"  ltype="text" value="${request.guaranteeTime }" />
+                    </td>
+                    <td ></td>
+                    <td class="hehe">收据扫描件/合同扫描件：</td>
+                    <td class="l-table-edit-td" >
+                        <div id="fileQueueHead"></div> 
+                        <input type="file" name="myFileHead" id="myFileHead" />
+                         <input name="guaranteeReceiptScanUrl" type="hidden" id="guaranteeReceiptScanUrl" value="${request.guaranteeReceiptScanUrl }" /></td>
+                        <td> <a href="javascript:$('#myFileHead').uploadifyUpload()">上传</a>| 
+                         <a href="javascript:$('#myFileHead').uploadifyClearQueue()">取消上传</a> 
+                        <font color="blue">
+                         (允许多张上传)</font> 
+                         </td>
+                </tr>
+    </table>
+</div>
+<div class="div">
+    <table border="0" cellspacing="20" class="l-table-edit">
+        <tr>
+        	<td class="hehe"  width="150px"><font color="red" size="4">*</font>请选择员工：</td>
+        	<td class="hehe"  width="130px">
+        		<input type="hidden"   id="userInId" name="inId"  ltype="text" value="${request.canalInId }" />
+        		<input type="hidden"   id="canalIdRelation" name="canalIdRelation"  value="${request.canalId }"   />
+        		<input type="text"   ltype="text"  id="user" name="user"  /></td>
+        	<td colspan="4"></td>
+        </tr>
+        <tr>    
+        <td class="hehe"  width="150px"><font color="red" size="4">*</font>员工姓名：</td>
+        <td class="l-table-edit-td" width="130px">
+        	<input type="text"   ltype="text"  id="userName" name="userName"  onblur="getPinyin()"  />
+        	<input type="hidden"   ltype="text"  id="userNameOld" name="userNameOld"   />
+        </td>
+        <td width="150px"></td>
+        <td class="hehe" width="150px"> 姓名拼音：</td>
+        <td  class="l-table-edit-td" width="130px">
+        	<input type="text"  ltype="text"  id="userPinyin" readonly="readonly" name="userPinyin" />
+        	<input type="hidden"  ltype="text" id="userPinyinOld" name="userPinyinOld" />
+        </td>
+        <td width="150px"></td>
+      </tr>
+      <tr>
+        <td class="hehe" >CRM工号：</td>
+        <td class="l-table-edit-td" >
+        	<input type="text" ltype="text" id="userNumber" name="userNumber"  readonly="readonly"  />
+        </td>
+        <td><font color="red"></font></td>
+        <td class="hehe"><font color="red" size="4">*</font>员工类别：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text"  id="userKind" name="userKind"  />
+        	<input type="hidden"   ltype="text"  id="userKindOld"  name="userKindOld"  />
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="hehe"><font color="red" size="4">*</font>工号状态：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text" id="userState" name="userState"  />
+        	<input type="hidden"   ltype="text" id="userStateOld" name="userStateOld"  />
+        </td>
+        <td></td>
+        <td class="hehe"><font color="red" size="4">*</font>绑定手机号码：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text"  id="userCellphone" name="userCellphone"  onblur="checklegal('userCellphone')"  />
+        	<input type="hidden"   ltype="text"  id="userCellphoneOld" name="userCellphoneOld"   />
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="hehe">身份证号：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="userIdCard" name="userIdCard"  onblur="checklegal('userIdCard')"  />
+        	<input type="hidden"  ltype="text"  id="userIdCardOld" name="userIdCardOld"  />
+        </td>
+        <td></td>
+        <td class="hehe">工号权限：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="userAuthority" name="userAuthority"   />
+        	<input type="hidden"  ltype="text" id="userAuthorityOld"  name="userAuthorityOld"   />
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="hehe">邮箱：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="userEmail" name="userEmail"  onblur="checklegal('userEmail')" />
+        	<input type="hidden"  ltype="text"  id="userEmailOld"  name="userEmailOld"  />
+        </td>
+        <td></td>
+        <td class="hehe"></td>
+        <td class="l-table-edit-td"></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="hehe"><font color="red" size="4">*</font>计费角色：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text" id="userRole" name="userRole"   />
+        	<input type="hidden"   ltype="text" id="userRoleOld" name="userRoleOld"  />
+        </td>
+        <td></td>
+        <td class="hehe"><font color="red" size="4">*</font>计费工号：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="userCountId" name="userCountId"   />
+        	<input type="hidden"  ltype="text"  id="userCountIdOld" name="userCountIdOld"  />
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="hehe"><font color="red" size="4">*</font>性别：</td>
+        <td class="l-table-edit-td">
+            <input type="radio" id="sex1" name="userSex" value="男"     />男&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="radio" id="sex2" name="userSex" value="女"  />女</td>
+        <td><input type="hidden" id="userSex" name="userSexOld"  /></td>
+        <td class="hehe">生日：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="userBirthday" name="userBirthday" />
+        	<input type="hidden"  ltype="text"  id="userBirthdayOld" name="userBirthdayOld" />
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="hehe">籍贯：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="userNativeplace" name="userNativeplace" />
+        	<input type="hidden"  ltype="text"  id="userNativeplaceOld" name="userNativeplaceOld"   />
+        </td>
+        <td></td>
+        <td class="hehe">联系电话：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text" id="userPhone" name="userPhone" onblur="checklegal('userPhone')"  />
+        	<input type="hidden"   ltype="text" id="userPhoneOld" name="userPhoneOld" />
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="hehe">文化程度：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="userEducation" name="userEducation"  />
+        	<input type="hidden"  ltype="text"  id="userEducationOld" name="userEducationOld"  />
+        </td>
+        <td></td>
+        <td class="hehe">技能证书：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="userCertification" name="userCertification"  />
+        	<input type="hidden"  ltype="text"  id="userCertificationOld" name="userCertificationOld"  />
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="hehe">入职时间：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="userInDate" name="userInDate" />
+        	<input type="hidden"  ltype="text"  id="userInDateOld" name="userInDateOld" />
+        </td>
+        <td></td>
+        <td class="hehe">离职时间：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text" id="userOutDate" name="userOutDate" />
+        	<input type="hidden"   ltype="text" id="userOutDateOld" name="userOutDateOld" />
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="hehe">住址：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="userAddress" name="userAddress"  />
+        	<input type="hidden"  ltype="text"  id="userAddressOld" name="userAddressOld"  />
+        </td>
+        <td></td>
+        <td class="hehe">岗位：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="userPosition" name="userPosition" />
+        	<input type="hidden"  ltype="text"  id="userPositionOld" name="userPositionOld" />
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="hehe"><font color="red" size="4">*</font>用工方式：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"   ltype="text" id="userWay" name="userWay"  />
+        	<input type="hidden"   ltype="text"  id="userWayOld" name="userWayOld" />
+        </td>
+        <td></td>
+        <td class="hehe">地区名称：</td>
+        <td class="l-table-edit-td">
+        	<input type="text"  ltype="text"  id="userRegionName" name="userRegionName"  />
+        	<input type="hidden"  ltype="text"  id="userRegionNameOld"  name="userRegionNameOld"  />
+        </td>
+        <td></td>
+      </tr> 
+      <tr>
+        <td class="hehe">备注：</td>
+        <td class="l-table-edit-td" colspan="2"><textarea class="l-textarea" name="remark" id="remark"style="width:200px; height:50px;" ></textarea></td>
+        <td><input type="hidden"  ltype="text"  id="remarkOld" name="remarkOld"  /></td>
+        <td align="center" colspan="2"> </td>
+      </tr> 
+    </table>
+</div>
+<div class="div">
+        <div class="reg">
+          
+          
+          <ul  id = "abc">	
+ 		<li id="100"><font color="red" >*</font>分公司：<span id="1"></span></li>
+ 		<li id="101">代理商编码：<span id="2"></span></li>
+ 		<li id="102"><font color="red" >*</font>代理商名称：<span id="3"></span></li>
+ 		<li id="103"><font color="red" >*</font>代理商简称：<span id="4"></span></li>
+		<li id="104"><font color="red" >*</font>管理部门：<span id="5"></span></li>
+ 		<li id="105"><font color="red" >*</font>代理商级别：<span id="6"></span></li> 
+ 		<li id="106"><font color="red" >*</font>公司类型：<span id="7"></span></li>
+ 		<li id="107"><font color="red" >*</font>合作伙伴类型：<span id="8"></span></li>
+ 		<li id="108"><font color="red" >*</font>法人代表：<span id="9"></span></li>
+ 		<li id="109"><font color="red" >*</font>法人代表联系电话：<span id="10"></span></li>
+ 		<li id="110"><font color="red" >*</font>法人证件类型：<span id="11"></span></li>
+
+ 		<li id="111"><font color="red" >*</font>法人证件号码：<span id="12"></span></li>
+ 		<li id="112"><font color="red" >*</font>管理模式：<span id="13"></span></li> 
+ 		<li id="113"><font color="red" >*</font>是否发11888卡：<span id="14"></span></li>
+ 		<li id="114"><font color="red" >*</font>负责人姓名：<span id="15"></span></li>
+ 		<li id="115"><font color="red" >*</font>负责人联系电话：<span id="16"></span></li>
+ 		<li id="116"><font color="red" >*</font>开户银行：<span id="17"></span></li>
+ 		<li id="117"><font color="red" >*</font>银行账号：<span id="18"></span></li>
+
+		<li id="118">上级合作伙伴编码：<span id="19"></span></li>
+		<li id="119">上级合作伙伴名称：<span id="20"></span></li>
+		<li id="120" >公司办公地址码：<span id="21"></span></li>
+		<li id="121">负责人联系地址：<span id="22"></span></li>
+		<li id="122">负责人QQ：<span id="23"></span></li>
+		<li id="123">邮政编码：<span id="24"></span></li>
+		<li id="124">传真：<span id="25"></span></li>
+		<li id="125">电子邮箱：<span id="26"></span></li>
+ 
+		<li id="126">付款方式：<span id="27"></span></li>
+		<li id="127">银行账户名称：<span id="28"></span></li>
+		<li id="128">委托收款方开户银行：<span id="29"></span></li>
+		<li id="129">委托收款方帐号：<span id="30"></span></li>
+		<li id="130">委托收款方名称：<span id="31"></span></li>
+		<li id="131">支付对象：<span id="32"></span></li>
+		<li id="132">注册资本：<span id="33"></span>(万元)</li>
+		<li id="133">工商登记时间：：<span id="34"></span></li>
+		<li id="134">法人营业执照编号：<span id="35"></span></li>
+		<li id="135">税务登记证编号：<span id="36"></span></li>
+		<li id="136">银行开户许可证编号：<span id="37"></span></li>
+		<li id="137">组织机构代码证编号：<span id="38"></span></li>
+
+
+
+
+		<li>渠道申请名称：<span id="41"></span></li>
+		<li>区域名称：<span id="42"></span></li>
+		<li>渠道形态：<span id="43"></span></li>		  
+		<li><font color="red">* </font>渠道性质：<span id="44"></span></li>
+		<li><font color="red">* </font>渠道类型：<span id="45"></span></li>
+		<li><font color="red">* </font>区域特征：<span id="46"></span></li>
+		<li><font color="red">* </font>渠道地址：<span id="47"></span></li>
+		<li id="140">归属上级渠道名称：<span id="48"></span></li>			 
+		<li id="141">归属上级渠道编码：<span id="49"></span></li>
+		<li>所属渠道客户经理：<span id="50"></span></li>
+		<li><font color="red">* </font>渠道归属部门：<span id="51"></span></li>
+		<li><font color="red">* </font>负责人：<span id="52"></span></li>
+		<li><font color="red">* </font>联系电话：<span id="53"></span></li>
+				
+		<li>身份证号码：<span id="54"></span></li>
+		<li><font color="red">* </font>城乡标识：<span id="55"></span></li>
+		<li><font color="red">* </font>产权归属：<span id="56"></span></li>
+		<li><font color="red">* </font>营业面积：<span id="57"></span></li>
+		<li><font color="red">* </font>月租金额：<span id="58"></span></li>
+		<li><font color="red">* </font>房租合同开始时间：<span id="59"></span></li>
+		<li><font color="red">* </font>房租合同结束时间：<span id="60"></span></li>
+		<li>合同期补贴政策：<span id="61"></span></li>
+		<li><font color="red">* </font>首期房租补贴(元/月：：<span id="62"></span></li>
+		<li><font color="red">* </font>首期装修补贴金额(元/月)：<span id="63"></span></li>
+		<li>房产权所有人姓名：<span id="64"></span></li>
+		<li>房产权所有人电话：<span id="65"></span></li>
+		<li>是否发卡网点：<span id="66"></span></li>
+
+		<li>营收资金银行账号：<span id="67"></span></li>
+		<li>开户号：<span id="68"></span></li>
+		<li>开户银行名：<span id="69"></span></li>
+		<li>归集账号：<span id="70"></span></li>
+		<li>开户人身份证号：<span id="71"></span></li>
+
+		<li>保证金金额：<span id="72"></span></li>
+		<li>保证金办理人：<span id="73"></span></li>
+		<li>办理时间：<span id="74"></span></li>				
+		<li>收据扫描件/合同扫描件：<span id="75"></span></li>
+
+
+
+		<li><font color="red" >*</font>员工姓名：<span id="76"></span></li>
+		<li>姓名拼音：<span id="77"></span></li>
+		<li>CRM工号：<span id="78"></span></li>
+		<li><font color="red" >*</font>员工类别：<span id="79"></span></li>
+		<li><font color="red" >*</font>工号状态：<span id="80"></span></li>
+		<li><font color="red" >*</font>绑定手机号码：<span id="81"></span></li>
+		<li>身份证号：<span id="82"></span></li>
+		<li>工号权限：<span id="83"></span></li>		
+		<li>邮箱：<span id="84"></span></li>
+		<li><font color="red" >*</font>计费角色：<span id="85"></span></li>
+		<li><font color="red" >*</font>计费工号：<span id="86"></span></li>
+		<li><font color="red" >*</font>性别：<span id="87"></span></li>
+		<li>生日：<span id="88"></span></li>
+		<li>籍贯：<span id="89"></span></li>
+		<li>联系电话：<span id="90"></span></li>	
+		<li>文化程度：<span id="91"></span></li>
+		<li>技能证书：<span id="92"></span></li>
+		<li>入职时间：<span id="93"></span></li>	
+		<li>离职时间：<span id="94"></span></li>
+		<li>住址：<span id="95"></span></li>
+		<li>岗位：<span id="96"></span></li>	
+		<li><font color="red" size="4">*</font>用工方式：<span id="97"></span></li>
+		<li>地区名称：<span id="98"></span></li>
+		<li>备注：<span id="99"></span></li>	
+	</ul>    
+        </div>
+        <center>
+             <button type="submit" id="btn">提 交</button>
+        </center>
+</div>
+</form>
+</body>
+<script type="text/javascript">
+function ajaxUpdate() {
+	var reg=$(".reg");
+	var aImg=$(".reg").find("span").find("img");
+	if(aImg.length){
+		$.ligerDialog.error('请核实信息，再提交！');
+		return false;
+	}else{
+		check();
+		$.blockUI({
+			message : '<h5><img src="./images/loading.gif" /> 系统正在提交中……</h5>'
+		});
+		var params = $('#form1').serialize().replace(/\+/g, ' '); //这里直接就序列化了表单里面的值；很方便  
+		params = decodeURIComponent(params, true);
+		params = encodeURIComponent(encodeURIComponent(params)).replace(/%253D/g, '=').replace(/%2526/g, '&');
+		$.ajax({
+			url : 'canalInfoUpdateAction', //后台处理程序   
+			type : 'post', //数据发送方式   
+			dataType : 'text', //接受数据格式   
+			data : params, //要传递的数据；就是上面序列化的值   
+			success : submit_Result  //回传函数(这里是函数名)    
+		});
+	}	
+}
+function submit_Result(result) { //回传函数实体，参数为XMLhttpRequest.responseText   
+	$.unblockUI();			
+	var temp = result.split(";");
+	if (temp[0] == 'success') {
+		 window.parent.$("#maingrid4").ligerGrid().loadData(true);		
+		  	$.ligerDialog.success('提交成功，请关闭对话框！','提示',function(){		
+		  		var parentWindow_body =  $(window.parent.document).find("body");if(! parentWindow_body.find(".dealWithMask").length){parentWindow_body.append("<input type=text class=dealWithMask style=height:0;border:none/>");}parentWindow_body.find(".dealWithMask").focus(); window.parent.$.ligerDialog.close();
+	      });	
+	} else if (temp[0] == 'infoLoss') {
+		alert('信息填写不完整！');
+	} else if (temp[0] == 'error') {
+		alert('系统错误，请联系管理员！');
+	} else if (temp[0] == 'duplicate') {
+		alert('重复提交');
+	} else {
+		alert(temp[0]);
+	}
+}
+
+	$('#rentStartDate').ligerDateEditor({
+		labelWidth : 100,
+		labelAlign : 'right',
+		format : "yyyy-MM-dd"
+	});
+	$('#rentEndDate').ligerDateEditor({
+		labelWidth : 100,
+		labelAlign : 'right',
+		format : "yyyy-MM-dd"
+	});
+	$('#guaranteeTime').ligerDateEditor({
+		labelWidth : 100,
+		labelAlign : 'right',
+		format : "yyyy-MM-dd"
+	});
+	$("#registerDate").ligerDateEditor({
+		labelWidth : 100,
+		labelAlign : 'right',
+		format : "yyyy-MM-dd"
+	});
+	$("#userBirthday").ligerDateEditor({
+		labelWidth : 100,
+		labelAlign : 'right',
+		format : "yyyy-MM-dd"
+	});
+	$("#userOutDate").ligerDateEditor({
+		labelWidth : 100,
+		labelAlign : 'right',
+		format : "yyyy-MM-dd"
+	});
+	$("#userInDate").ligerDateEditor({
+		labelWidth : 100,
+		labelAlign : 'right',
+		format : "yyyy-MM-dd"
+	});
+	//代理商信息的确认
+	function checklegal(id){    //验证账号、密码是否合
+		var pn=/^[1-9]\d{5}(?!\d)$/;
+		var postCode = document.getElementById("postCode").value;
+		if(postCode != ""){
+  		  	if(pn.test(postCode) == false){
+  		    	alert("请正确填写邮政编码，邮政编码为6位数字组成!");
+  		    	return false;
+  		  	}
+		}
+		//验证身份证号
+		var userIdCard= document.getElementById("userIdCard").value;
+		var reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;  
+		if(userIdCard != ""){
+			if(reg.test(userIdCard) === false)  {  
+			       	alert("身份证输入不合法");  
+			       	$("#userIdCard").val("");
+			      	return  false;  
+			 }
+		}
+		//验证邮箱
+		var em= /^[a-zA-Z0-9_+.-]+\@([a-zA-Z0-9-]+\.)+[a-zA-Z0-9]{2,4}$/;
+		var agentEmail= document.getElementById("agentEmail").value;
+		var userEmail= document.getElementById("userEmail").value;
+		if(agentEmail != ""){
+			  if(em.test(agentEmail) == false){
+			    	alert("请正确填写邮箱地址！");
+			    	return false;
+			  }
+		  }
+		if(userEmail != ""){
+			  if(em.test(userEmail) == false){
+			    	alert("请正确填写邮箱地址！");
+			    	return false;
+			  }
+		  }
+		//验证QQ
+		  var ab=/^[1-9][0-9]{4,11}$/;
+		  var ondutyPersonQqnum = document.getElementById("ondutyPersonQqnum").value;
+		  if(ondutyPersonQqnum != ""){
+			  if(ab.test(ondutyPersonQqnum) == false){
+			    	alert("请正确填写QQ号码,格式为5-12位数字，首位不能是0！");
+			    	return false;
+			  }
+		  }
+	  	//验证电话号码手机号码，包含至今所有号段 
+	  var ab=/^(13[0-9]|15[0-9]|18[0-9])\d{8}$/;
+	  var ondutyPersonPhone = document.getElementById("ondutyPersonPhone").value;
+	  var userCellphone = document.getElementById("userCellphone").value;
+	  var legalPhone = document.getElementById("legalPhone").value;
+	  var userPhone = document.getElementById("userPhone").value;
+	  if(ondutyPersonPhone != null && ondutyPersonPhone!=""){
+		  if(ab.test(ondutyPersonPhone) == false){
+		    	alert("请正确填写手机号码,例如 13812345678，或者固定电话02312345678");
+		    	return false;
+		  }
+	  }
+	  if(userCellphone != null && userCellphone!=""){
+		  if(ab.test(userCellphone) == false){
+		    	alert("请正确填写手机号码,例如 13812345678，或者固定电话02312345678");
+		    	return false;
+		  }
+	  }
+	  if(legalPhone != null && legalPhone!=""){
+			if (ab.test(legalPhone) == false) {
+				alert("请正确填写手机号码,例如 13812345678，或者固定电话02312345678");
+				return false;
+			}
+	  }
+	  if(userPhone != null && userPhone !=""){
+			if (ab.test(userPhone) == false) {
+				alert("请正确填写手机号码,例如 13812345678，或者固定电话02312345678");
+				return false;
+			}
+	  }
+	//数字是否合法
+		var money = /^[0-9]+[0-9]*(\.\d+)?$/;
+		var registerMoney = $('#registerMoney').val();
+		if(registerMoney != null && registerMoney!=""){
+			if (money.test(registerMoney) == false) {
+				alert("请输入正确的数字!");
+				return false;
+			}
+		}
+		var fax =/^[+]{0,1}(\d){1,3}[ ]?([-]?((\d)|[ ]){1,12})+$/;
+		var agentFax = $('#agentFax').val();
+		if(agentFax != null && agentFax!=""){
+			if (fax.test(agentFax) == false) {
+				alert("请输入正确的传真，：+123 -999 999 ； +123 -999 999 ；123 999 999 ；+123 999999!");
+				return false;
+			}
+		}
+		$("#"+id).ligerHideTip();
+  }
+	
+	function check(){
+		//验证电话号码手机号码，包含至今所有号段   
+		var ab = /^(13[0-9]|15[0-9]|18[0-9]|023)\d{8}$/;
+		var canalUserPhone = $('#canalUserPhone').val();
+		if(canalUserPhone != null && canalUserPhone!=""){
+			if (ab.test(canalUserPhone) == false) {
+				alert("请正确填写手机号码,例如 13812345678，或者固定电话02312345678");
+				return false;
+			}
+		}
+		var houseOwnerPhone = $('#houseOwnerPhone').val();
+		if(houseOwnerPhone != null && houseOwnerPhone!=""){
+			if (ab.test(houseOwnerPhone) == false) {
+				alert("请正确填写手机号码,例如 13812345678，或者固定电话02312345678");
+				return false;
+			}
+		}
+		//身份证号正则(18位)
+		var idCard = /^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{4}$/;
+		var canalIdCard = $('#canalIdCard').val();
+		var inPersonIdCard = $('#canalIdCard').val();
+		if(canalIdCard != null && canalIdCard!=""){
+			if (idCard.test(canalIdCard) == false) {
+				alert("请正确填写身份证号码");
+				return false;
+			}
+		}
+		if(inPersonIdCard != null && inPersonIdCard!=""){
+			if (idCard.test(inPersonIdCard) == false) {
+				alert("请正确填写身份证号码");
+				return false;
+			}
+		}
+		//ltype='spinner' ligerui="{type:'float'}" onblur="check()"
+		//
+		//数字是否合法
+		
+		var money = /^[0-9]+[0-9]*(\.\d+)?$/;
+		var businessArea = $('#businessArea').val();
+		var rentMoney = $('#rentMoney').val();
+		var firstRentAllowance = $('#firstRentAllowance').val();
+		var firstDecorationAllowance = $('#firstDecorationAllowance').val();
+		var guaranteeAmount = $('#guaranteeAmount').val();
+		if(businessArea != null && businessArea!=""){
+			if (money.test(businessArea) == false) {
+				alert("请输入正确的数!");
+				return false;
+			}
+		}
+		if(rentMoney != null && rentMoney!=""){
+			if (money.test(rentMoney) == false) {
+				alert("请输入正确的数!");
+				return false;
+			}
+		}
+		if(firstRentAllowance != null && firstRentAllowance!=""){
+			if (money.test(firstRentAllowance) == false) {
+				alert("请输入正确的数!");
+				return false;
+			}
+		}
+		if(firstDecorationAllowance != null && firstDecorationAllowance!=""){
+			if (money.test(firstDecorationAllowance) == false) {
+				alert("请输入正确的数!");
+				return false;
+			}
+		}
+		if(guaranteeAmount != null && guaranteeAmount!=""){
+			if (money.test(guaranteeAmount) == false) {
+				alert("请输入正确的数!");
+				return false;
+			}
+		}
+		
+	}
+	/***Ajax引擎******/
+	function createXmlHttpRequest() {
+		var xmlHttp;
+		try { //Firefox, Opera 8.0+, Safari
+			xmlHttp = new XMLHttpRequest();
+		} catch (e) {
+			try { //Internet Explorer
+				xmlHttp = new ActiveXObject("Msxml2.XMLHTTP");
+			} catch (e) {
+				try {
+					xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+				} catch (e) {
+				}
+			}
+		}
+		return xmlHttp;
+	}
+	function getPinyin(){
+		var userName = $('#userName').val();
+		var pinyin = copy2Pinyin(userName);
+		$("#userPinyin").val(pinyin);
+	}
+	function getAgentLevel(){
+		  var actionURL = encodeURI(encodeURI( "agentLevelQueryAction?dept="+$('#agentDept').val()));
+		   $.ajax({
+				type:"post",
+				url:actionURL,
+				dataType:"json",
+				success:function(data){
+					$("#agentLevel").ligerGetComboBoxManager().setData(data);
+				}
+			});
+	}
+	function f_closeAddWindow(item, dialog) {
+		$.ligerDialog.confirm('确认要关闭窗口吗', function(yes) {
+			if (yes)
+				dialog.close();
+		})
+		manager.loadData(true);
+	}
+</script>
+</html>

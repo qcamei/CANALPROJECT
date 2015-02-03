@@ -1,0 +1,149 @@
+package com.cqupt.canalManage.action;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.log4j.Logger;
+import org.apache.struts2.ServletActionContext;
+
+import com.cqupt.pub.dao.DataStormSession;
+import com.cqupt.pub.exception.CquptException;
+import com.opensymphony.xwork2.ActionSupport;
+
+public class CanalInfoDetailAction extends ActionSupport {
+	Logger logger = Logger.getLogger(getClass());
+	private static final long serialVersionUID = 1L;
+	HttpServletRequest request = null;
+
+	public String execute() {
+		request = ServletActionContext.getRequest();
+		String inId = request.getParameter("inId");
+		String type = request.getParameter("type");
+		String resultStr = "";
+		DataStormSession session = null;
+		try {
+			session = DataStormSession.getInstance();
+			String sql = "select *,date_format(oper_time,'%Y-%m-%d %H:%i:%s') time,date_format(rent_start_date,'%Y-%m-%d') rent_start_date1,"
+					+ "date_format(rent_end_date,'%Y-%m-%d') rent_end_date1,date_format(guarantee_time,'%Y-%m-%d') guarantee_time1"
+					+ " from qdzc.canal_infomation where in_id='" + inId + "'";
+			logger.info("查询详细信息" + sql);
+
+			List<Map<String, Object>> resultList = session.findSql(sql);
+			Map<String, Object> resultMap = (Map<String, Object>) resultList
+					.get(0);
+			// 命名自动更换模式
+			request.setAttribute("inId", resultMap.get("inId"));
+			request.setAttribute("canalId", resultMap.get("canalId"));
+			request.setAttribute("canalName", resultMap.get("canalName"));
+			request.setAttribute("areaName", resultMap.get("areaName"));
+			request.setAttribute("canalAddress", resultMap.get("canalAddress"));
+			request.setAttribute("regionCharacter",
+					resultMap.get("regionCharacter"));
+			request.setAttribute("canalState", resultMap.get("canalState"));
+
+			request.setAttribute("canalForm", resultMap.get("canalForm"));
+			request.setAttribute("canalProperty",
+					resultMap.get("canalProperty"));
+			request.setAttribute("canalType", resultMap.get("canalType"));
+			request.setAttribute("canalParentId",
+					resultMap.get("canalParentId"));
+			request.setAttribute("canalParentName",
+					resultMap.get("canalParentName"));
+			request.setAttribute("agentName", resultMap.get("agentName"));
+			request.setAttribute("agentId", resultMap.get("agentId"));
+
+			request.setAttribute("canalUserName",
+					resultMap.get("canalUserName"));
+			request.setAttribute("canalUserPhone",
+					resultMap.get("canalUserPhone"));
+			request.setAttribute("canalIdCard", resultMap.get("canalIdCard"));
+			request.setAttribute("canalManager", resultMap.get("canalManager"));
+			request.setAttribute("canalManagerId",
+					resultMap.get("canalManagerId"));
+			request.setAttribute("urbanIdetity", resultMap.get("urbanIdetity"));
+			request.setAttribute("expireType", resultMap.get("expireType"));
+
+			request.setAttribute("businessArea", resultMap.get("businessArea"));
+			request.setAttribute("rentMoney", resultMap.get("rentMoney"));
+			request.setAttribute("rentStartDate",
+					resultMap.get("rentStartDate1"));
+			request.setAttribute("rentEndDate", resultMap.get("rentEndDate1"));
+			request.setAttribute("allowancePolicy",
+					resultMap.get("allowancePolicy"));
+			request.setAttribute("firstRentAllowance",
+					resultMap.get("firstRentAllowance"));
+			request.setAttribute("firstDecorationAllowance",
+					resultMap.get("firstDecorationAllowance"));
+
+			request.setAttribute("canalDept", resultMap.get("canalDept"));
+			request.setAttribute("houseOwnerName",
+					resultMap.get("houseOwnerName"));
+			request.setAttribute("houseOwnerPhone",
+					resultMap.get("houseOwnerPhone"));
+			request.setAttribute("distributeCard",
+					resultMap.get("distributeCard"));
+			request.setAttribute("inBankAccount",
+					resultMap.get("inBankAccount"));
+			request.setAttribute("inBankAccountNumber",
+					resultMap.get("inBankAccountNumber"));
+			request.setAttribute("inBankName", resultMap.get("inBankName"));
+
+			request.setAttribute("inCollectNumber",
+					resultMap.get("inCollectNumber"));
+			request.setAttribute("inPersonIdCard",
+					resultMap.get("inPersonIdCard"));
+			request.setAttribute("contractScanUrl",
+					resultMap.get("contractScanUrl"));
+			request.setAttribute("guaranteeAmount",
+					resultMap.get("guaranteeAmount"));
+			request.setAttribute("guaranteeUser",
+					resultMap.get("guaranteeUser"));
+			request.setAttribute("guaranteeTime",
+					resultMap.get("guaranteeTime1"));
+			request.setAttribute("guaranteeReceiptScanUrl",
+					resultMap.get("guaranteeReceiptScanUrl"));
+
+			request.setAttribute("hm", resultMap.get("hm"));
+			request.setAttribute("khyh", resultMap.get("khyh"));
+			request.setAttribute("kh", resultMap.get("kh"));
+			request.setAttribute("sfzh", resultMap.get("sfzh"));
+
+			request.setAttribute("operUserNum", resultMap.get("operUserNum"));
+			request.setAttribute("operUser", resultMap.get("operUser"));
+			request.setAttribute("deptId", resultMap.get("deptId"));
+			request.setAttribute("deptName", resultMap.get("deptName"));
+			request.setAttribute("operTime", resultMap.get("time"));
+			request.setAttribute("remark", resultMap.get("remark"));
+
+			String agentInId = (String) resultMap.get("agentInId");
+			String sql1 = "select * from qdzc.agent_infomation where in_id='"
+					+ agentInId + "'";
+			logger.info("查询详细信息" + sql);
+
+			List<Map<String, Object>> resultList1 = session.findSql(sql);
+			Map<String, Object> resultMap1 = (Map<String, Object>) resultList1
+					.get(0);
+			// 命名自动更换模式
+			request.setAttribute("parentId", resultMap1.get("parentId"));
+			request.setAttribute("parentName", resultMap1.get("parentName"));
+
+			session.closeSession();
+		} catch (Exception e) {
+			try {
+				session.exceptionCloseSession();
+			} catch (CquptException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+		}
+		if (type.equals("modify")) {
+			resultStr = "modify";
+		} else if (type.equals("detail")) {
+			resultStr = "detail";
+		}
+		return resultStr;
+
+	}
+}

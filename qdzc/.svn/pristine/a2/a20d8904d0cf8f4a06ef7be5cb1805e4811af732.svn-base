@@ -1,0 +1,409 @@
+package com.cqupt.canalManage.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
+import org.apache.struts2.ServletActionContext;
+
+import com.cqupt.pub.dao.DataStormSession;
+import com.cqupt.pub.exception.CquptException;
+import com.cqupt.pub.util.DecodeUtils;
+import com.cqupt.pub.util.Tools;
+import com.cqupt.service.MailRemindUtil;
+import com.opensymphony.xwork2.ActionSupport;
+
+public class CanalInfoAddAction extends ActionSupport {
+	private static final long serialVersionUID = -3503583143062479748L;
+	Logger logger = Logger.getLogger(this.getClass());
+	HttpServletRequest request = null;
+	HttpServletResponse response = null;
+	String standbyPhoneId = "null";
+
+	@Override
+	public String execute() {
+
+		try {
+			response = ServletActionContext.getResponse();
+			response.setCharacterEncoding("UTF-8");
+			PrintWriter out = response.getWriter();
+			out.print(insertIntoDatabase());
+			out.flush();
+			out.close();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		return null;
+	}
+
+	private String insertIntoDatabase() {
+		String resultStr = "success";
+		String sql = "";
+		request = ServletActionContext.getRequest();
+		DataStormSession session = null;
+
+		String deptId = request.getSession().getAttribute("deptId").toString();
+		String deptName = request.getSession().getAttribute("deptName")
+				.toString();
+		String operUser = request.getSession().getAttribute("userName")
+				.toString();
+
+		String state = DecodeUtils.decodeRequestString(request
+				.getParameter("state"));
+		// String agentId = "";
+		// String agentName = "";
+		// String branchCompany = null;
+		// String agentShortName = null;
+		// String agentState = null;
+		// String agentDept = null;
+		// String agentLevel = null;
+		// String companyType = null;
+		// String cooperationType = null;
+		// String legalPerson = null;
+		// String legalPhone = null;
+		// String legalCardType = null;
+		// String legalIdCard = null;
+		// String manageModel = null;
+		// String is11888Card = null;
+		// String ondutyPerson = null;
+		// String ondutyPersonPhone = null;
+		// String startBank = null;
+		// String bankAccountId = null;
+		// String parentId = null;
+		// String parentName = null;
+		// String companyAddress = null;
+		// String ondutyPersonAddress = null;
+		// String ondutyPersonQqnum = null;
+		// String postCode = null;
+		// String agentFax = null;
+		// String agentEmail = null;
+		// String payWay = null;
+		// String bankAccountName = null;
+		// String weituoStartBank = null;
+		// String weituoBankAccount = null;
+		// String weituoBankName = null;
+		// String payObject = null;
+		// String registerMoney = null;
+		// String registerDate = null;
+		// String businessLicenseId = null;
+		// String taxRegisteId = null;
+		// String bankPermisionId = null;
+		// String organizationCodeId = null;
+
+		// 渠道表信息
+		String canalForm = DecodeUtils.decodeRequestString(request
+				.getParameter("canalForm"));// 渠道形态
+		String canalProperty = DecodeUtils.decodeRequestString(request
+				.getParameter("canalProperty"));// 渠道性质
+		String canalType = DecodeUtils.decodeRequestString(request
+				.getParameter("canalType"));// 渠道类型
+
+		// 代理商表信息
+		String inIdAgent = Tools.getOrderID();
+		String branchCompany = DecodeUtils.decodeRequestString(request
+				.getParameter("branchCompany"));// 分公司
+		String agentName = DecodeUtils.decodeRequestString(request
+				.getParameter("agentName"));// 代理商名称
+		String agentShortName = DecodeUtils.decodeRequestString(request
+				.getParameter("agentShortName"));// 代理商简称
+		String agentDept = DecodeUtils.decodeRequestString(request
+				.getParameter("agentDept"));// 管理部门
+		String agentLevel = DecodeUtils.decodeRequestString(request
+				.getParameter("agentLevel"));// 代理商级别
+		String companyType = DecodeUtils.decodeRequestString(request
+				.getParameter("companyType"));// 公司类型
+		String cooperationType = DecodeUtils.decodeRequestString(request
+				.getParameter("cooperationType"));// 合作伙伴类型
+		String legalPerson = DecodeUtils.decodeRequestString(request
+				.getParameter("legalPerson"));// 法人代表
+		String legalPhone = DecodeUtils.decodeRequestString(request
+				.getParameter("legalPhone"));// 法人代表联系电话
+		String legalCardType = DecodeUtils.decodeRequestString(request
+				.getParameter("legalCardType"));// 法人证件类型
+		String legalIdCard = DecodeUtils.decodeRequestString(request
+				.getParameter("legalIdCard"));// 法人证件号码
+		String ondutyPerson = DecodeUtils.decodeRequestString(request
+				.getParameter("ondutyPerson"));// 负责人姓名
+		String ondutyPersonPhone = DecodeUtils.decodeRequestString(request
+				.getParameter("ondutyPersonPhone"));// 负责人联系电话
+
+		String startBank = DecodeUtils.decodeRequestString(request
+				.getParameter("startBank"));// 开户银行
+		String bankAccountId = DecodeUtils.decodeRequestString(request
+				.getParameter("bankAccountId"));// 开户银行账号
+
+		// 渠道表信息
+		String inIdCanal = Tools.getOrderID();
+		// 选择已有代理商时显示这两个字段
+		String agentName1 = DecodeUtils.decodeRequestString(request
+				.getParameter("agentName1"));// 归属代理商名称
+		String agentId1 = DecodeUtils.decodeRequestString(request
+				.getParameter("agentId1"));// 归属代理商编码
+
+		String isCrm = "接入";
+		// 这里主要是因为前台当选择【开放渠道】时，把isCrm的下拉框禁用了，所以使用后台验证
+
+		String inCollectNumber = DecodeUtils.decodeRequestString(request
+				.getParameter("inCollectNumber"));// 翼支付账号
+		String isMoney = DecodeUtils.decodeRequestString(request
+				.getParameter("isMoney"));// 翼支付账号
+		String taskType = DecodeUtils.decodeRequestString(request
+				.getParameter("taskType"));// 业务类型
+		String guaranteeAmount = DecodeUtils.decodeRequestString(request
+				.getParameter("guaranteeAmount"));// 保证金金额
+		String guaranteeUser = DecodeUtils.decodeRequestString(request
+				.getParameter("guaranteeUser"));// 办理人
+		String guaranteeTime = DecodeUtils.decodeRequestString(request
+				.getParameter("guaranteeTime"));// 办理时间
+		String guaranteeReceiptScanUrl = DecodeUtils
+				.decodeRequestString(request
+						.getParameter("guaranteeReceiptScanUrl"));// 上传快照路径
+		String canalName = DecodeUtils.decodeRequestString(request
+				.getParameter("canalName"));// 渠道名称
+		String areaName = DecodeUtils.decodeRequestString(request
+				.getParameter("areaName"));// 区域名称
+		String canalAddress = DecodeUtils.decodeRequestString(request
+				.getParameter("canalAddress"));// 渠道地址
+		String regionCharacter = DecodeUtils.decodeRequestString(request
+				.getParameter("regionCharacter"));// 区域特征
+		String canalDept = DecodeUtils.decodeRequestString(request
+				.getParameter("canalDept"));// 渠道归属部门
+		String canalUserName = DecodeUtils.decodeRequestString(request
+				.getParameter("canalUserName"));// 负责人
+		String canalUserPhone = DecodeUtils.decodeRequestString(request
+				.getParameter("canalUserPhone"));// 联系电话
+		String urbanIdetity = DecodeUtils.decodeRequestString(request
+				.getParameter("urbanIdetity"));// 城乡标识
+		String expireType = DecodeUtils.decodeRequestString(request
+				.getParameter("expireType"));// 产权归属
+		String businessArea = DecodeUtils.decodeRequestString(request
+				.getParameter("businessArea"));// 营业面积
+		String rentStartDate = DecodeUtils.decodeRequestString(request
+				.getParameter("rentStartDate"));// 房租开始时间
+		String rentEndDate = DecodeUtils.decodeRequestString(request
+				.getParameter("rentEndDate"));// 房租结束时间
+		String firstRentAllowance = DecodeUtils.decodeRequestString(request
+				.getParameter("firstRentAllowance"));// 首期房租补贴(元/月)
+		String firstDecorationAllowance = DecodeUtils
+				.decodeRequestString(request
+						.getParameter("firstDecorationAllowance"));// 首期装修补贴金额(元/月)
+		String contractScanUrl = "";
+		String remark = DecodeUtils.decodeRequestString(request
+				.getParameter("remark"));
+		String isLine = DecodeUtils.decodeRequestString(request
+				.getParameter("isLine"));
+		// 营业员信息表
+		String inIdUser = Tools.getOrderID();
+		String userName = DecodeUtils.decodeRequestString(request
+				.getParameter("userName"));// 营业员姓名
+		String userPinyin = DecodeUtils.decodeRequestString(request
+				.getParameter("userPinyin"));// 姓名拼音
+		String userSex = DecodeUtils.decodeRequestString(request
+				.getParameter("userSex"));// 性别
+		// 资金归结（缴营业款）
+		String hm = DecodeUtils.decodeRequestString(request.getParameter("hm"));// 户名
+		String khyh = DecodeUtils.decodeRequestString(request
+				.getParameter("khyh"));// 开户银行
+		String kh = DecodeUtils.decodeRequestString(request.getParameter("kh"));// 卡号
+		String sfzh = DecodeUtils.decodeRequestString(request
+				.getParameter("sfzh"));// 身份证号
+
+		try {
+			session = DataStormSession.getInstance();
+			if (resultStr.equals("success")) {
+				sql = "select in_id from qdzc.canal_infomation where canal_name = '"
+						+ canalName + "'";
+				logger.info(sql);
+				List list = session.findSql(sql);
+				if (list.size() > 0) {
+					resultStr = "渠道名称已存在！";
+				}
+			}
+
+			if (resultStr.equals("success")) {
+				// 插入渠道基础信息
+				sql = "insert into qdzc.canal_infomation (in_id,is_crm,is_money,task_type,canal_name,area_name,canal_address,region_character,"
+						+ "canal_state,canal_form,canal_property,canal_type,agent_name,canal_user_name,canal_user_phone,"
+						+ "urban_idetity,expire_type,business_area,rent_start_date,rent_end_date,first_rent_allowance,first_decoration_allowance,"
+						+ "canal_dept,in_collect_number,contract_scan_url,"
+						+ "guarantee_amount,guarantee_user,guarantee_time,guarantee_receipt_scan_url,hm,khyh,kh,sfzh,oper_user,dept_id,dept_name,oper_time,agent_in_id,remark,is_line)"
+						+ " values ('"
+						+ inIdCanal
+						+ "','"
+						+ isCrm
+						+ "','"
+						+ isMoney
+						+ "','"
+						+ taskType
+						+ "','"
+						+ canalName
+						+ "','"
+						+ areaName
+						+ "','"
+						+ canalAddress
+						+ "','"
+						+ regionCharacter
+						+ "','正常', '"
+						+ canalForm
+						+ "', '"
+						+ canalProperty
+						+ "', '"
+						+ canalType
+						+ "','"
+						+ agentName
+						+ "', '"
+						+ canalUserName
+						+ "', '"
+						+ canalUserPhone
+						+ "','"
+						+ urbanIdetity
+						+ "', '"
+						+ expireType
+						+ "', '"
+						+ businessArea
+						+ "', '"
+						+ rentStartDate
+						+ "', '"
+						+ rentEndDate
+						+ "','"
+						+ firstRentAllowance
+						+ "','"
+						+ firstDecorationAllowance
+						+ "', "
+						+ "'"
+						+ canalDept
+						+ "', '"
+						+ inCollectNumber
+						+ "', '"
+						+ contractScanUrl
+						+ "', "
+						+ "'"
+						+ guaranteeAmount
+						+ "','"
+						+ guaranteeUser
+						+ "','"
+						+ guaranteeTime
+						+ "','"
+						+ guaranteeReceiptScanUrl
+						+ "','"
+						+ hm
+						+ "','"
+						+ khyh
+						+ "','"
+						+ kh
+						+ "','"
+						+ sfzh
+						+ "','"
+						+ operUser
+						+ "','"
+						+ deptId
+						+ "','"
+						+ deptName
+						+ "',sysdate(),'"
+						+ inIdAgent + "','" + remark + "','" + isLine + "')";
+				logger.info("新增渠道信息：" + sql);
+				session.add(sql);
+				// 插入渠道状态表
+
+				sql = "insert into qdzc.canal_step_state (in_id,canal_id,canal_name,oper_user,dept_id,dept_name,oper_time,current_step) values ("
+						+ "'"
+						+ inIdCanal
+						+ "','','"
+						+ canalName
+						+ "', '"
+						+ operUser
+						+ "','"
+						+ deptId
+						+ "','"
+						+ deptName
+						+ "',sysdate(),'1')";
+				logger.info("插入渠道状态表：" + sql);
+				session.add(sql);
+
+				if (state.equals("no")) {
+					sql = "insert into agent_information (in_id, branch_company, area_name, agent_id, agent_name, agent_short_name, agent_state, agent_dept, agent_level, company_type, cooperation_type, legal_person, legal_phone, legal_card_type, legal_id_card, onduty_person, onduty_person_phone, start_bank, bank_accountId, oper_user, dept_id, dept_name, oper_time)values('"
+							+ inIdAgent
+							+ "','"
+							+ branchCompany
+							+ "','"
+							+ areaName
+							+ "','"
+							+ agentId1
+							+ "','"
+							+ agentName
+							+ "','"
+							+ agentShortName
+							+ "','正常','"
+							+ agentDept
+							+ "','"
+							+ agentLevel
+							+ "','"
+							+ companyType
+							+ "','"
+							+ cooperationType
+							+ "','"
+							+ legalPerson
+							+ "','"
+							+ legalPhone
+							+ "','"
+							+ legalCardType
+							+ "','"
+							+ legalIdCard
+							+ "','"
+							+ ondutyPerson
+							+ "','"
+							+ ondutyPersonPhone
+							+ "','"
+							+ startBank
+							+ "','"
+							+ bankAccountId
+							+ "','"
+							+ operUser
+							+ "','"
+							+ deptId
+							+ "','" + deptName + "',sysdate())";
+					logger.info("添加用户：" + sql);
+					session.add(sql);
+				}
+
+				sql = "insert into canal_user (in_id, canal_in_id,user_name,canal_name,user_agent,user_pinyin,user_sex, oper_user, dept_name, dept_id, oper_time) values('"
+						+ inIdUser
+						+ "','"
+						+ inIdCanal
+						+ "','"
+						+ userName
+						+ "','"
+						+ canalName
+						+ "','"
+						+ agentName
+						+ "','"
+						+ userPinyin
+						+ "','"
+						+ userSex
+						+ "','"
+						+ operUser
+						+ "','" + deptName + "','" + deptId + "',sysdate())";
+				logger.info("添加用户：" + sql);
+				session.add(sql);
+				// 申请成功发邮件通知
+				MailRemindUtil.mailFGS(operUser, canalName);
+				session.closeSession();
+				resultStr += ";" + inIdCanal;
+			}
+		} catch (CquptException e) {
+			resultStr = "error";
+			e.printStackTrace();
+			try {
+				session.exceptionCloseSession();
+			} catch (CquptException e1) {
+				e1.printStackTrace();
+			}
+		}
+		logger.info(resultStr);
+		return resultStr;
+	}
+}

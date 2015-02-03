@@ -1,0 +1,812 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+	"http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<!--指定全局国际化资源文件base名 -->
+	<constant name="struts.custom.i18n.resources" value="messageResource" />
+	<!--指定国际化编码所使用的字符集 -->
+	<constant name="struts.i18n.encoding" value="UTF8" />
+	<!-- 上传的全部图片的最大限制 -->
+	<constant name="struts.multipart.maxSize" value="1024102400" />
+	<constant name="struts.devMode" value="false" />
+	
+	<package name="web" extends="struts-default" namespace="/">
+	
+		<!--定义拦截器 -->
+		<interceptors>
+			<!--定义权限拦截器 -->
+			<interceptor name="authority" class="com.cqupt.login.AuthorityInterceptor"></interceptor>
+			<interceptor-stack name="mydefaultstcak">
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+				<interceptor-ref name="authority"></interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+		<default-interceptor-ref name="mydefaultstcak"></default-interceptor-ref>
+		<global-results>
+			<result name="login" type="dispatcher">/reLogin.jsp</result>
+		</global-results>
+		
+		<action name="login" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result>/login.jsp</result>
+		</action>
+		<action name="sendMailAction" class="com.cqupt.service.ServiceRemindAction">
+		</action>
+		
+		<!-- 系统管理 修改密码 -->
+		<action name="changePWDAction" class="com.cqupt.login.ChangePWDAction"></action>
+		
+		<!-- 欢迎页任务提醒 action与Jsp对应关系 -->	
+		<action name="welcomeAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/mainFrame/welcome_list.jsp</result>
+		</action>
+		<!-- 显示首页列表的Action -->
+		<action name="shouyeListAction" class="com.cqupt.service.ShouyeListAction"></action>
+		<action name="shouyeListModifyAction" class="com.cqupt.service.ShouyeListModifyAction"></action>
+	
+		<action name="loginAction" class="com.cqupt.login.LoginAction">
+			<!--定义3个逻辑试图和物理资源之间的映射 -->
+			<result name="success">/mainFrame/frame.jsp</result>
+		</action>
+		<!-- 登录验证 -->
+		<action name="checkLoginAction" class="com.cqupt.login.CheckLoginAction"></action>
+		<action name="loginOutAction" class="com.cqupt.login.LoginOutAction"></action>
+		<action name="userMenuAction" class="com.cqupt.login.UserMenuAction"></action>
+
+
+		<!-- 系统管理 第一个子菜单 菜单表里指向的userManager -->
+		<action name="onLineUserManagerAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/sysManage/onLineUser.jsp</result>
+		</action>
+		<!-- 系统管理 查询在线用户 -->
+		<action name="onLineUserAction" class="com.cqupt.sysManage.action.OnLineUserAction"></action>
+		<!-- 系统管理 强制用户退出登录 -->
+		<action name="onlineUserForceExitAction" class="com.cqupt.sysManage.action.OnlineUserForceExitAction"></action>
+
+		<!-- 系统管理 组织机构管理 -->
+		<action name="organizationManageAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/sysManage/organizationManage.jsp</result>
+		</action>
+		<!-- 系统管理 点击树事件        还没做好HR-->
+		<action name="organizationQueryAction" class="com.cqupt.sysManage.action.OrganizationQueryAction">
+			<result type="stream">
+				<param name="contentType">text/xml</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+		<!-- 系统管理 组织机构列表 -->
+		<action name="organizationListQueryAction"	class="com.cqupt.sysManage.action.OrganizationListQueryAction"></action>
+		<!-- 系统管理 组织机构新增  -->
+		<action name="organizationDeptAddAction" class="com.cqupt.sysManage.action.OrganizationDeptAddAction"></action>
+		<!-- 系统管理 组织机构修改 -->
+		<action name="organizationModifyAction"	class="com.cqupt.sysManage.action.OrganizationModifyAction">
+			<result name="modify">/sysManage/organizationModify.jsp</result>
+		</action>
+		<!-- 系统管理 组织机构更新 -->
+		<action name="organizationDeptUpdateAction"	class="com.cqupt.sysManage.action.OrganizationDeptUpdateAction"></action>
+		<!-- 系统管理 组织机构删除 -->
+		<action name="organizationListDeleteAction"	class="com.cqupt.sysManage.action.OrganizationListDeleteAction"></action>
+		<!-- 系统管理 部门管理 部门excel 模板下载 -->
+		<action name="organizationExcelFileDownloadAction" class="com.cqupt.sysManage.action.OrganizationExcelFileDownloadAction">
+			<result name="success">/sysManage/organizationFileDownload.jsp</result>	
+		</action>	
+		<action name="organizationAddExcelAction" class="com.cqupt.sysManage.action.OrganizationAddExcelAction"/>	
+		<!-- 部门类型查询-->
+	 	<action name="deptLevelQueryAction" class="com.cqupt.sysManage.action.DeptLevelQueryAction"></action> 
+		<!-- 父部门查询-->
+		<action name="parentDeptNameQueryAction" class="com.cqupt.sysManage.action.ParentDeptNameQueryAction"></action> 
+		<!-- 系统管理 查询区域  -->
+		<action name="areaQueryAction" class="com.cqupt.sysManage.action.AreaQueryAction"></action>
+		<!-- 系统管理 查询用户组  -->
+		<action name="groupNameQueryAction" class="com.cqupt.sysManage.action.GroupNameQueryAction"></action>
+		
+		
+	
+		<!-- 系统管理 用户管理 -->
+		<action name="userManageAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/sysManage/userManager.jsp</result>
+		</action>
+		<!-- 系统管理 用户查询 -->
+		<action name="userManagerQueryAction"	class="com.cqupt.sysManage.action.UserManagerQueryAction"></action>
+		<!-- 系统管理用户管理 新增用户 -->
+		<action name="userManagerAddUserAction"	class="com.cqupt.sysManage.action.UserManagerAddUserAction"></action>
+		<!--系统管理 用户管理 修改用户传参 -->
+		<action name="userManagerModifyAction"	class="com.cqupt.sysManage.action.UserManagerModifyAction">
+			<result name="modify">/sysManage/userManagerModify.jsp</result>
+		</action>
+		<!-- 系统管理用户管理 修改用户重置密码 -->
+		<action name="userManagerPasswordModifyAction"	class="com.cqupt.sysManage.action.UserManagerPasswordModifyAction"></action>
+		<!--系统管理 用户管理 修改用户操作 -->
+		<action name="userManagerModifyUserAction"	class="com.cqupt.sysManage.action.UserManagerModifyUserAction"></action>
+		<!-- 系统管理用户管理 删除用户 -->
+		<action name="userManagerDeleteUserAction"	class="com.cqupt.sysManage.action.UserManagerDeleteUserAction"></action>
+		<!-- 系统管理 角色权限 -->
+		<action name="groupAuthAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/sysManage/groupAuth.jsp</result>
+		</action>
+		<!-- 系统管理 角色权限树 点击树事件 -->
+			<action name="groupAuthTreeQueryAction" class="com.cqupt.sysManage.action.GroupAuthTreeQueryAction">
+				<result type="stream">
+					<param name="contentType">text/xml</param>
+					<param name="inputName">inputStream</param>
+				</result>
+			</action>
+		<!-- 系统管理 角色权限查询 -->
+		<action name="groupAuthListQueryAction"	class="com.cqupt.sysManage.action.GroupAuthListQueryAction"></action>
+		<!-- 系统管理 角色修改页面中菜单树  已有权限查询 -->
+		<action name="groupAuthModifyInitData" class="com.cqupt.sysManage.action.GroupAuthModifyInitData"></action>
+		<!-- 系统管理 角色修改页面中菜单树  所有权限查询 -->
+		<action name="groupAuthCreateTreeAction" class="com.cqupt.sysManage.action.GroupAuthCreateTreeAction"></action>
+		<!-- 系统管理 角色修改页面  新增菜单 -->
+		<action name="groupAuthGetPopedomGroupAction" class="com.cqupt.sysManage.action.GroupAuthGetPopedomGroupAction"></action>
+		<!-- 新增角色组 -->
+		<action name="groupAuthAddAction" class="com.cqupt.sysManage.action.GroupAuthAddAction"></action>
+		<!-- 修改角色组 -->
+		<action name="groupAuthModifyAction" class="com.cqupt.sysManage.action.GroupAuthModifyAction"></action>
+	<!-- HR ~end~ -->
+		<!-- 用户EXCEL下载-->
+		<action name="UserDown" class="com.cqupt.sysManage.action.UserDown">
+    		<result name="success" type="stream"> 
+                <param name="contentType">application/vnd.ms-excel</param> 
+                <param name="contentDisposition">attachment;filename="users.xls"</param> 
+                <param name="inputName">excelFile</param> 
+            </result> 
+  		 </action>
+		<!-- 系统管理 点击树事件 显示所有部门 -->
+		<action name="organizationQueryAllAction"
+			class="com.cqupt.sysManage.action.OrganizationQueryAllAction">
+			<result type="stream">
+				<param name="contentType">text/xml</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+	
+		<!-- 系统管理 区域管理-->
+		<action name="areaManageAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/sysManage/areaManage.jsp</result>
+		</action>
+		<!-- 系统管理 区域管理 区域查询for ligerui -->
+		<action name="getAreaQueryActionII" class="com.cqupt.sysManage.action.GetAreaQueryActionII"/>
+		<!-- 系统管理 区域管理 区域添加 -->
+		<action name="areaAddAction" class="com.cqupt.sysManage.action.AreaAddAction"></action>
+		<!-- 系统管理 区域管理 区域修改 -->
+		<action name="areaModifyQueryAction" class="com.cqupt.sysManage.action.AreaModifyQueryAction">
+				<result name="success">/sysManage/areaModify.jsp</result>
+		</action>
+		<!-- 系统管理 区域管理 区域修改提交 -->
+		<action name="areaUpdateAction" class="com.cqupt.sysManage.action.AreaUpdateAction"></action>
+		<!-- 系统管理 区域管理 区域删除 -->
+		<action name="areaDeleteAction" class="com.cqupt.sysManage.action.AreaDeleteAction"></action>
+	
+	
+	
+<!-- 这些模块没用 -->
+	<!-- 支/分局管理 -->
+	<action name="subStationManageAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/sysManage/subStationManage.jsp</result>	
+	</action>
+	<!-- 支/分局管理 生成数据 for grid -->
+	<action name="getsubStationQueryActionII" class="com.cqupt.sysManage.action.GetsubStationQueryActionII"/>
+	<!-- 支/分局添加  -->
+	<action name="subStationAddAction" class="com.cqupt.sysManage.action.SubStationAddAction"/>
+	<!-- 支/分局修改  初始化 -->
+	<action name="subStationModifyQueryAction" class="com.cqupt.sysManage.action.SubStationModifyQueryAction">
+		<result name="success">/sysManage/areaModify.jsp</result>
+	</action>
+	<!-- 系统管理 区域管理(省) -->
+	<action name="areaManageProAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/sysManage/areaManagePro.jsp</result>
+	</action>
+	<!-- 系统管理 区域管理(省) 市查询 for combobox -->
+	<action name="areaProQueryAction" class="com.cqupt.sysManage.action.AreaProQueryAction"/>
+
+<!--这些模块没用 End -->
+ 
+ 	<!-- 系统管理-下拉列表数据维护 --> 
+	<action name="selectDataProtect" class="com.cqupt.sysMenu.action.WelcomeAction">
+	<result name="success">/selectData/selectDataInfo.jsp</result>
+	</action>
+	<!-- 系统管理  下拉列表维护   信息查询 -->
+	 <action name="selectDataQueryAction" class="com.cqupt.select.action.SelectDataQueryAction">
+	</action>
+	<!-- 系统管理  下拉列表维护 信息添加 -->
+	<action name="selectDataSelectItemAction" class="com.cqupt.select.action.SelectDataSelectItemAction">
+	</action>
+	<action name="selectPreSelectItemQueryAction" class="com.cqupt.select.action.SelectPreSelectItemQueryAction">
+	</action>
+	<action name="selectDataAddAction" class="com.cqupt.select.action.SelectDataAddAction">
+	</action>
+	<!-- 系统管理  下拉列表维护 信息删除 -->
+	<action name="selectDataDeleteAction" class="com.cqupt.select.action.SelectDataDeleteAction">
+	</action>
+	<!-- 系统管理  下拉列表维护 信息修改 -->
+	<action name="selectDataModifyAction" class="com.cqupt.select.action.SelectDataModifyAction">
+	<result name="success">/selectData/selectDataModify.jsp</result>
+	</action>
+	 <!-- 系统管理  下拉列表维护 信息修改提交 -->
+	<action name="selectDataUpdateAction" class="com.cqupt.select.action.SelectDataUpdateAction">
+	</action>
+ 
+ 
+ 
+ 
+	<!-- 渠道管理 -->
+	<!-- 渠道管理  代理信息-->
+	<action name="agentInfoAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/canalManage/agentInfo.jsp</result>	
+	</action>
+	<!-- 代理商信息列表的显示 -->
+	<action name="agentManagerQueryAction" class="com.cqupt.canalManage.action.AgentManagerQueryAction">
+		<result name="success">/canalManage/agentInfo.jsp</result>	
+	</action>
+	
+	<!-- 代理商界别下拉菜单 -->
+	<action name="agentLevelQueryAction" class="com.cqupt.canalManage.action.AgentLevelQueryAction">
+	</action>
+	<!-- 渠道类型下拉菜单 -->
+	<action name="canalTypeQueryAction" class="com.cqupt.canalManage.action.CanalTypeQueryAction">
+	</action>
+	<!--本地类型下拉菜单 -->
+	<action name="nativeTypeQueryAction" class="com.cqupt.canalManage.action.NativeTypeQueryAction">
+	</action>
+	<!--保证金下拉菜单 -->
+	<action name="guaranteeMoneyQueryAction" class="com.cqupt.canalManage.action.GuaranteeMoneyQueryAction">
+	</action>
+	<!-- 渠道性质下拉菜单 -->
+	<action name="canalPropertyQueryAction" class="com.cqupt.canalManage.action.CanalPropertyQueryAction">
+	</action>
+	<!-- 增加代理商时 验证其唯一性 -->
+	<action name="testAgentIdOnlyOneAction" class="com.cqupt.canalManage.action.TestAgentIdOnlyOneAction">
+	</action>
+	<!-- 添加代理商信息 -->
+	<action name="agentAddAction" class="com.cqupt.canalManage.action.AgentAddAction">
+	</action>
+	<!-- 进入代理商详情页面 -->
+	<action name="agentModifyQueryAction" class="com.cqupt.canalManage.action.AgentModifyQueryAction">
+		<result name="success">/canalManage/showAgentDetails.jsp</result>
+	</action>
+	<!-- 修改代理商信息页面 -->
+	<action name="agentModifyQueryAction1" class="com.cqupt.canalManage.action.AgentModifyQueryAction">
+		<result name="success">/canalManage/agentModify.jsp</result>
+	</action>
+	<!-- 修改代理商信息操作 -->
+	<action name="agentModifyAction" class="com.cqupt.canalManage.action.AgentModifyAction">
+	</action>
+	
+	<!-- 渠道管理  渠道员工信息-->
+	<action name="canalUserInfoAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/canalManage/canalUserInfo.jsp</result>	
+	</action>
+	<!-- 渠道员工列表信息-->
+	<action name="canalUserQueryAction" class="com.cqupt.canalManage.action.CanalUserQueryAction">
+	</action>	
+	<!-- 渠道员工添加-->
+	<action name="canalUserAddAction" class="com.cqupt.canalManage.action.CanalUserAddAction"></action>
+	<!-- 渠道员工添加时根据渠道Id显示对应代理商的名字-->
+	<action name="canalNameQueryAction" class="com.cqupt.canalManage.action.CanalNameQueryActionRough">
+	</action>
+	<!-- 渠道员工修改-->
+	<action name="canalUserModifyQueryAction" class="com.cqupt.canalManage.action.CanalUserModifyQueryAction">
+		<result name="success">/canalManage/canalUserModify.jsp</result>
+	</action>
+	<action name="canalUserModifyAction" class="com.cqupt.canalManage.action.CanalUserModifyAction">
+	</action>
+	<!-- 显示详细信息 -->
+	<action name="canalUserDetailsAction" class="com.cqupt.canalManage.action.CanalUserDetailsAction">
+		<result name="success">/canalManage/showCanalUserDetails.jsp</result>
+	</action>
+	
+	<!-- 渠道信息 -->
+	<!-- 渠道管理  渠道信息-->
+	<action name="canalInfoAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/canalManage/canalInfo.jsp</result>	
+	</action>
+	<!-- 渠道查询 -->
+	<action name="canalInfoQueryAction" class="com.cqupt.canalManage.action.CanalInfoQueryAction"/>
+	<!-- 渠道查询 
+	<action name="canalInfoQueryAction1" class="com.cqupt.canalModifyFlow.CanalInfoQueryAction1"/>-->
+	<!-- 渠道新增-->
+	<action name="canalInfoAddAction" class="com.cqupt.canalManage.action.CanalInfoAddAction"/>
+	<!-- 渠道新增 补录-->
+	<action name="canalInfoAddAction_0" class="com.cqupt.canalManage.action.CanalInfoAddAction_0"/>
+	<!-- 下拉选　项-->
+	<action name="selectItemQueryAction" class="com.cqupt.canalManage.action.SelectItemQueryAction"/>
+	<!-- 渠道归属部门模糊查询-->
+	<action name="deptQueryActionRough" class="com.cqupt.canalManage.action.DeptQueryActionRough"/>
+	<!-- 渠道归属客户经理模糊查询-->
+	<action name="userQueryActionRough" class="com.cqupt.canalManage.action.UserQueryActionRough"/>
+	<!-- 渠道修改 &明细 -->
+	<action name="canalInfoDetailAction" class="com.cqupt.canalManage.action.CanalInfoDetailAction">
+		<result name="modify">/canalManage/canalInfoModify.jsp</result>	
+		<result name="detail">/canalManage/showCanalDetail.jsp</result>	
+	</action>
+	<!-- 必填字段 回显 -->
+	<action name="canalDetailAction" class="com.cqupt.canalManage.action.CanalDetailAction">
+		<result name="modify">/canalManage/canalInfoModify.jsp</result>	
+		<result name="detail">/canalManage/canalInfoDetail.jsp</result>
+	</action>
+	<!-- 选填字段 回显 -->
+	<action name="canalDetailAction_0" class="com.cqupt.canalManage.action.CanalDetailAction_0">
+		<result name="modify">/canalManage/canalInfoModify_0.jsp</result>
+		<result name="detail">/canalManage/canalInfoDetail_0.jsp</result>		
+	</action>
+
+	<!--  <action name="biangengBitian" class="com.cqupt.canalModifyFlow.CanalInfoModifyAction_modify"></action>
+	<action name="biangengXuantian" class="com.cqupt.canalModifyFlow.CanalInfoModifyAction_0_modify"></action>-->
+	<!-- 申请流程工单处理详情-->
+	<action name="canalProcessDetailAction" class="com.cqupt.canalManage.action.CanalProcessDetailAction"></action>
+	
+	<!-- 变更流程工单处理详情-->
+	<action name="modifyProcessDetailAction" class="com.cqupt.canalModifyFlow.ModifyProcessDetailAction"></action>
+	<!-- 必填字段修改-->
+	<action name="canalModifyAction" class="com.cqupt.canalManage.action.CanalInfoModifyAction">
+	</action>
+	<!-- 选填字段 修改 -->
+	<action name="canalModifyAction_0" class="com.cqupt.canalManage.action.CanalInfoModifyAction_0">
+	</action>
+	<!-- 渠道修改 提交-->
+	 <action name="canalInfoUpdateAction" class="com.cqupt.canalManage.action.CanalInfoUpdateAction"/> 
+	<!-- 归属代理商模糊查询-->
+	<action name="agentNameQueryActionRough" class="com.cqupt.canalManage.action.AgentNameQueryActionRough"/>
+	<!-- 渠道 新增 上传图片-->
+	<action name="scanImgUploadAction" class="com.cqupt.canalManage.action.ScanImgUploadAction"/>
+	
+	<!-- 渠道信息  end-->
+
+
+		<!-- 渠道流程2 渠道审核流程  分公司审核 -->
+		<action name="filialeAuditAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalAuditFlow/filialeAudit.jsp</result>
+		</action>
+		<!--渠道流程2  分公司审核信息的添加 -->
+		<action name="filialeAuditAddAction" class="com.cqupt.canalAuditFlow.FilialeAuditAddAction"></action>
+		<!-- 渠道流程2  分公司审核列表信息 -->
+		<action name="filialeAuditQueryAction" class="com.cqupt.canalAuditFlow.FilialeAuditQueryAction"></action>
+		<!-- 渠道流程2 　添加　修改 &明细 -->
+		<action name="filialeAuditDetailAction" class="com.cqupt.canalAuditFlow.FilialeAuditDetailAction">
+			<result name="success">/canalAuditFlow/filialeAuditModify.jsp</result>	
+		</action>
+		
+		
+		<!-- 渠道流程3  分管部门审核 -->
+		<action name="subDeptAuditAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalAuditFlow/subDeptAudit.jsp</result>
+		</action>
+		<!-- 渠道流程3  分管部门审核列表信息 -->
+		<action name="subDeptQueryAction" class="com.cqupt.canalAuditFlow.SubDeptQueryAction"></action>
+		<!-- 渠道流程3  添加信息 -->
+		<action name="subDeptAddAction" class="com.cqupt.canalAuditFlow.SubDeptAddAction"></action>
+	   <!-- 渠道流程3 　添加　修改 &明细 -->
+		<action name="subDeptDetailAction" class="com.cqupt.canalAuditFlow.SubDeptDetailAction">
+			<result name="success">/canalAuditFlow/subDeptModify.jsp</result>	
+		</action>
+	   
+
+	   <!-- 渠道流程45  代理商系统列表页面 -->
+		<action name="agentCanalAuditAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalAuditFlow/agentCanal.jsp</result>
+		</action>
+		<!-- 渠道流程45  代理商系统列表信息 -->
+		<action name="agentCanalQueryAction" class="com.cqupt.canalAuditFlow.AgentCanalQueryAction"></action>
+		<!-- 渠道流程45  代理商系统添加信息 -->
+		<action name="agentCanalAddAction" class="com.cqupt.canalAuditFlow.AgentCanalAddAction"></action>
+		  <!-- 渠道流程45 　代理商系统添加　修改 &明细 -->
+		<action name="agentCanalDetailAction" class="com.cqupt.canalAuditFlow.AgentCanalDetailAction">
+			<result name="success">/canalAuditFlow/agentCanalModify.jsp</result>	
+		</action>
+		
+		
+		
+		 <!-- 渠道流程6  开CRM工号列表页面 -->
+		<action name="openCRMAuditAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalAuditFlow/openCRM.jsp</result>
+		</action>
+		<!-- 渠道流程6 开CRM工号列表信息 -->
+		<action name="openCRMQueryAction" class="com.cqupt.canalAuditFlow.OpenCRMQueryAction"></action>
+		<!-- 渠道流程6 开CRM工号添加信息 -->
+		<action name="openCRMAddAction" class="com.cqupt.canalAuditFlow.OpenCRMAddAction"></action>
+		<!-- 渠道流程6 员工姓名，取自流程五的员工姓名 -->
+		<action name="employeeNameQueryAction" class="com.cqupt.canalAuditFlow.EmloyeeNameQueryAction"></action>
+	
+		 <!-- 渠道流程6 　开CRM工号添加　修改 &明细 -->
+		<action name="openCRMDetailAction" class="com.cqupt.canalAuditFlow.OpenCRMDetailAction">
+			<result name="success">/canalAuditFlow/openCRMModify.jsp</result>	
+		</action>
+
+		<!-- 渠道流程7  开代理商门户网站列表页面 -->
+		<action name="openAgentWebAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalAuditFlow/openAgentWeb.jsp</result>
+		</action>
+		<!-- 渠道流程7  代理商门户网站中门户网站号来自第六步中CRM号前面加LZ -->
+		<action name="userNumberQueryAction" class="com.cqupt.canalAuditFlow.UserNumberQueryAction">
+		</action>
+		<!-- 渠道流程7 开代理商门户网站列表信息 -->
+		<action name="openAgentWebQueryAction" class="com.cqupt.canalAuditFlow.OpenAgentWebQueryAction"></action>
+		<!-- 渠道流程7 开代理商门户网站添加信息 -->
+		<action name="openAgentWebAddAction" class="com.cqupt.canalAuditFlow.OpenAgentWebAddAction"></action>
+		
+		 <!-- 渠道流程7 　开代理商门户网站添加　修改 &明细 -->
+		<action name="openAgentWebDetailAction" class="com.cqupt.canalAuditFlow.OpenAgentWebDetailAction">
+			<result name="success">/canalAuditFlow/openAgentWebModify.jsp</result>	
+		</action>
+		<!-- 渠道流程7  开代理商门户网站信息修改 -->
+		<action name="agentWebAction" class="com.cqupt.canalAuditFlow.AgentWebAction">
+			<result name="success">/canalAuditFlow/openAgentWebAdd.jsp</result>
+		</action>
+		
+		
+		<!-- 渠道流程8  资金稽核编码列表页面 -->
+		<action name="moneyCheckAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalAuditFlow/moneyCheck.jsp</result>
+		</action>
+		<!-- 渠道流程8  资金稽核编码列表信息 -->
+		<action name="moneyCheckQueryAction" class="com.cqupt.canalAuditFlow.MoneyCheckQueryAction"></action>
+		<!-- 渠道流程8  资金稽核编码添加信息 -->
+		<action name="moneyCheckAddAction" class="com.cqupt.canalAuditFlow.MoneyCheckAddAction"></action>
+		 <!-- 渠道流程8 　资金稽核编码添加　修改 &明细 -->
+		<action name="moneyCheckDetailAction" class="com.cqupt.canalAuditFlow.MoneyCheckDetailAction">
+			<result name="success">/canalAuditFlow/moneyCheckModify.jsp</result>	
+		</action>
+		<!-- 渠道流程8  资金稽核编码信息添加  -->
+		<action name="checkNumberQuery" class="com.cqupt.canalAuditFlow.CheckNumberQuery">
+			<result name="success">/canalAuditFlow/moneyCheckAdd.jsp</result>
+		</action>
+		
+		<!-- 渠道新增流程  财务审核 -->
+		<action name="financeAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalAuditFlow/finance.jsp</result>
+		</action>
+		<!-- 渠道新增流程  财务审核列表信息 -->
+		<action name="financeQueryAction" class="com.cqupt.canalAuditFlow.FinanceQueryAction"></action>
+		<!-- 渠道新增流程  财务审核审核页面 -->
+		<action name="financeAddAction" class="com.cqupt.canalAuditFlow.FinanceAddAction"></action>
+		
+		<!-- 渠道新增流程 翼支付 -->
+		<action name="bestoayAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalAuditFlow/bestoay.jsp</result>
+		</action>
+		<!-- 渠道新增流程  翼支付列表信息 -->
+		<action name="bestoayQueryAction" class="com.cqupt.canalAuditFlow.BestoayQueryAction"></action>
+		<!-- 渠道新增流程  翼支付添加 -->
+		<action name="bestoayAddAction" class="com.cqupt.canalAuditFlow.BestoayAddAction"></action>
+		
+		
+		
+		
+		
+		
+		<!-- 每个审核流程都要显示的详细信息 -->
+		<action name="detailQueryAction" class="com.cqupt.canalAuditFlow.DetailQueryAction">
+			<result name="agent">/canalAuditFlow/showAgentDetails.jsp</result>
+			<result name="canal">/canalAuditFlow/showCanalDetail.jsp</result>
+		</action>
+	    <action name="canalUserDetailAction" class="com.cqupt.canalAuditFlow.CanalUserDetailAction">
+			<result name="success">/canalAuditFlow/showCanalUserDetails.jsp</result>
+		</action>
+
+
+		<!-- 渠道流程８　稽核系统配置人员 -->
+		<action name="checkConfigurationAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalAuditFlow/checkConfiguration.jsp</result>
+		</action>
+		<!-- 渠道流程８　稽核系统配置人员查询 -->
+		<action name="checkConfigurationQueryAction" class="com.cqupt.canalAuditFlow.CheckConfigurationQueryAction"></action>
+		<!-- 下一状态查询 -->
+		<action name="nextStepValQueryAction" class="com.cqupt.canalAuditFlow.NextStepValQueryAction"></action>
+		<!-- 渠道流程８　稽核系统配置人员添加 -->
+		<action name="checkConfigurationAddAction" class="com.cqupt.canalAuditFlow.CheckConfigurationAddAction"></action>
+	
+		<!-- 渠道流程８　稽核系统配置人员详情 -->
+		<action name="checkConfigurationDetailAction" class="com.cqupt.canalAuditFlow.CheckConfigurationDetailAction">
+				<result name="modify">/canalAuditFlow/checkConfigurationModify.jsp</result>	
+		</action>
+		
+		<!-- 渠道流程9　专线受理确认 -->
+		<action name="configLineAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalAuditFlow/configLine.jsp</result>
+		</action>
+		<!-- 渠道流程9　专线受理确认 查询 -->
+		<action name="configLineQueryAction" class="com.cqupt.canalAuditFlow.ConfigLineQueryAction"></action>
+		
+		<!-- 渠道流程9 　添加　修改 &明细 -->
+		<action name="configLineDetailAction" class="com.cqupt.canalAuditFlow.ConfigLineDetailAction">
+			<result name="add">/canalAuditFlow/configLineAdd.jsp</result>	
+			<result name="modify">/canalAuditFlow/configLineModify.jsp</result>	
+		</action>
+		<!-- 渠道流程9　专线受理确认 添加 -->
+		<action name="configLineAddAction" class="com.cqupt.canalAuditFlow.ConfigLineAddAction"></action>
+		
+		<!-- 渠道流程10　设备基础配置 -->
+		<action name="deviceConfigurationAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalAuditFlow/deviceConfiguration.jsp</result>
+		</action>
+		<!-- 渠道流程10　设备基础配置 查询 -->
+		<action name="deviceConfigurationQueryAction" class="com.cqupt.canalAuditFlow.DeviceConfigurationQueryAction"></action>
+		<!-- 渠道流程10　设备基础配置 添加 -->
+		<action name="deviceConfigurationAddAction" class="com.cqupt.canalAuditFlow.DeviceConfigurationAddAction"></action>
+		<!-- 渠道流程10　设备基础配置详情  - 修改 -->
+		<action name="deviceConfigurationDetailAction" class="com.cqupt.canalAuditFlow.DeviceConfigurationDetailAction">
+				<result name="modify">/canalAuditFlow/deviceConfigurationModify.jsp</result>	
+		</action>
+		
+		<!-- 渠道流程12　专线受理-->
+		<action name="lineConfig12Action" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalAuditFlow/lineConfig12.jsp</result>
+		</action>
+		<!-- 渠道流程12　专线受理　查询 -->
+		<action name="lineConfig12QueryAction" class="com.cqupt.canalAuditFlow.LineConfig12QueryAction"></action>
+		<!-- 渠道流程12　专线受理　添加 -->
+		<action name="lineConfig12AddAction" class="com.cqupt.canalAuditFlow.LineConfig12AddAction"></action>
+		<!-- 渠道流程12　专线受理详情  - 修改 -->
+		<action name="lineConfig12DetailAction" class="com.cqupt.canalAuditFlow.LineConfig12DetailAction">
+				<result name="modify">/canalAuditFlow/lineConfig12Modify.jsp</result>	
+		</action>
+		
+		<!-- 流程图  查看-->
+		<action name="caseGraphicAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalAuditFlow/caseGraphic.jsp</result>
+		</action>
+		<action name="graphicQueryAction" class="com.cqupt.canalAuditFlow.GraphicQueryAction"></action>
+
+
+
+
+
+
+
+
+
+		<!-- 渠道变更  流程-->
+		<!-- 渠道变更申请首页面 -->
+		<action name="canalApplyModify" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalModifyFlow/canalAlterInfoQuery.jsp</result>
+		</action>
+		<!-- 渠道变申请受页面的信息列表 -->
+		<action name="alterInfoQueryAction" class="com.cqupt.canalModifyFlow.AlterInfoQueryAction"></action>
+		<!-- 申请界面的信息列表 -->
+		<action name="alterQuery" class="com.cqupt.canalModifyFlow.AlterApplyQuery"></action>
+		<!-- 申请页面 必填字段 回显 -->
+		<action name="alterDetailAction" class="com.cqupt.canalModifyFlow.AlterDetailAction">
+		 <result name="modify">/canalModifyFlow/alterInfoApply.jsp</result>
+		</action>
+		<!-- 选填字段 回显 -->
+		<action name="alterDetailAction_0" class="com.cqupt.canalModifyFlow.AlterDetailAction_0">
+		 <result name="modify">/canalModifyFlow/alterInfoApply_0.jsp</result> 	
+		</action>
+		<!-- 新增变更申请 -->
+	   <action name="alterInfoAddAction" class="com.cqupt.canalModifyFlow.AlterInfoAddAction"></action>
+		<action name="alterInfoAddAction_0" class="com.cqupt.canalModifyFlow.AlterInfoAddAction_0"></action>
+	   <!-- 详细页面 必填字段 回显 -->
+		<action name="detailAction" class="com.cqupt.canalModifyFlow.DetailAction">
+		 <result name="detail">/canalModifyFlow/alterInfoApply_detail.jsp</result>
+		  <result name="modify">/canalModifyFlow/alterInfoApply.jsp</result>
+		</action>
+		<!-- 详细页面 选填字段 回显 -->
+		<action name="detailAction_0" class="com.cqupt.canalModifyFlow.DetailAction_0">
+		 <result name="detail">/canalModifyFlow/alterInfoApply_0_detail.jsp</result> 	
+		 <result name="modify">/canalModifyFlow/alterInfoApply_0.jsp</result> 	
+		 </action>
+	 
+	   <!-- 渠道变更流程中的分公司审核 -->
+		<action name="filialeAudit" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalModifyFlow/filialeAudit.jsp</result>
+		</action>
+	  <!-- 分公司审核列表页面 -->
+		<action name="filialeAuditQuery" class="com.cqupt.canalModifyFlow.FilialeAuditQueryAction">
+		</action>
+		<!-- 分公司审核添加页面 -->
+		<action name="filialeAuditAdd" class="com.cqupt.canalModifyFlow.FilialeAuditAddAction">
+		</action>
+	   <!-- 分管部门审核首页面 -->
+		<action name="subDept" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalModifyFlow/subDept.jsp</result>
+		</action>
+		<!-- 分管部门审核列表页面 -->
+		<action name="subDeptQuery" class="com.cqupt.canalModifyFlow.SubDeptQueryAction">
+		</action>
+		<!-- 渠道流程3  添加信息 -->
+		<action name="subDeptAdd" class="com.cqupt.canalModifyFlow.SubDeptAddAction"></action>
+	    <!--资金审核首页面 -->
+		 <action name="financeAudit" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalModifyFlow/finance.jsp</result>
+		</action>
+		<!-- 财务审核列表页面 -->
+		<action name="financeQuery" class="com.cqupt.canalModifyFlow.FinanceAuditQueryAction"></action>
+		<!--财务审核添加信息 -->
+		<action name="financeAdd" class="com.cqupt.canalModifyFlow.FinanceAddAction"></action>
+	   <!--代理商系统渠道信息确认首页面 -->
+		<action name="agentCanal" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalModifyFlow/agentCanal.jsp</result>
+		</action>
+		<!-- 代理商系统渠道信息确认列表页面 -->
+		<action name="agentCanalQuery" class="com.cqupt.canalModifyFlow.AgentCanalQueryAction">
+		</action>
+		<!-- 代理商系统渠道信息确认添加信息 -->
+		<action name="agentCanalAdd" class="com.cqupt.canalModifyFlow.AgentCanalAddAction"></action>
+	
+	  <!--开CRM工号首页面 -->
+		<action name="crm" class="com.cqupt.sysMenu.action.WelcomeAction">
+			<result name="success">/canalModifyFlow/openCRM.jsp</result>
+		</action>
+		<!--开CRM工号列表页面 -->
+		<action name="crmQuery" class="com.cqupt.canalModifyFlow.CrmQueryAction">
+		</action>
+		<action name="openCrmAdd" class="com.cqupt.canalModifyFlow.CrmAddAction">
+		</action>
+	
+	    <!-- 查询流程信息的下拉列表 -->
+		<action name="nextStepValQueryAction1" class="com.cqupt.canalModifyFlow.NextStepValQueryAction1"></action>
+	  <!-- 操作历史查询 -->
+	   <action name="historyQueryAction" class="com.cqupt.canalModifyFlow.HistoryDetailQueryAction">
+		</action>
+	
+	
+	
+	
+<!--  渠道关闭 流程--> 
+ <!-- 1渠道申请    关闭 -->
+		<action name="canalApplyClose" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/canalCloseFlow/canalInfoFirst.jsp</result>
+		</action>
+		<!-- 渠道申请关闭       第一个页面 -->
+		<action name="canalCloseQueryAction" class="com.cqupt.canalCloseFlow.CanalCloseQueryAction">
+		</action>
+		<action name="canalInfoQueryActionClose" class="com.cqupt.canalCloseFlow.CanalInfoQueryActionClose">
+		</action>
+	   <!--渠道申请关闭       关闭方法-->	
+		<action name="writeCanalCloseContentAction" class="com.cqupt.canalCloseFlow.WriteCanalCloseContentAction">
+		</action>
+		<!-- 渠道申请关闭       取消关闭方法-->
+        <action name="canalQuxiaoCloseDetailAction" class="com.cqupt.canalCloseFlow.CanalQuxiaoCloseDetailAction">        	
+		</action>
+		  <action name="chaXunCurrentStateCloseAction" class="com.cqupt.canalCloseFlow.ChaXunCurrentStateCloseAction">        	
+		</action>
+             <!--  2渠道关闭     分公司审核    审核页面操作-->
+        <action name="filialeAuditAction2" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/canalCloseFlow/canalInfoSecond.jsp</result>
+		</action>
+		<action name="canalCloseQueryFGSAction" class="com.cqupt.canalCloseFlow.CanalCloseQueryFGSAction">
+		</action>
+		<action name="chaXunCurrentStepCloseAction" class="com.cqupt.canalCloseFlow.ChaXunCurrentStepCloseAction">
+		</action>
+		<!--渠道关闭     分公司审核   显示处理详情页面操作 -->
+		<action name="canalCloseDealDetailQueryAction" class="com.cqupt.canalCloseFlow.CanalCloseDealDetailQueryAction">
+		</action>
+          <!-- 下一状态查询 -->
+		<action name="nextStepValQueryCloseAction" class="com.cqupt.canalCloseFlow.NextStepValQueryCloseAction"></action>			
+		<!--渠道关闭     分公司审核   原因页面操作 -->
+		<action name="writeCanalCloseContentFGSAction" class="com.cqupt.canalCloseFlow.WriteCanalCloseContentFGSAction">
+		</action>		
+			
+		<!--  3渠道关闭     分管部门审核    审核页面操作-->
+        <action name="subDeptAuditAction3" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/canalCloseFlow/canalInfoThird.jsp</result>
+		</action>
+		<action name="canalCloseQueryFGBMAction" class="com.cqupt.canalCloseFlow.CanalCloseQueryFGSAction">
+		</action>		
+		<!--渠道关闭      分管部门审核    原因页面操作 -->
+		<action name="writeCanalCloseContentFGBMAction" class="com.cqupt.canalCloseFlow.WriteCanalCloseContentFGBMAction">
+		</action>
+			
+       	<!--  4渠道关闭     CRM审核    审核页面操作-->
+        <action name="closeCRMAuditAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/canalCloseFlow/canalInfoForth.jsp</result>
+		</action>
+		<action name="canalCloseQueryCRMAction" class="com.cqupt.canalCloseFlow.CanalCloseQueryFGSAction">
+		</action>		
+		<!--渠道关闭      分管部门审核    原因页面操作 -->
+		<action name="writeCanalCloseContentCRMAction" class="com.cqupt.canalCloseFlow.WriteCanalCloseContentCRMAction">
+		</action>
+		
+    
+    <!--  5渠道关闭    代理商管理系统审核    审核页面操作-->
+        <action name="daiLiShangManagerSysAction5" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/canalCloseFlow/canalInfoFifth.jsp</result>
+		</action>
+		<action name="canalCloseQueryDLSGLAction" class="com.cqupt.canalCloseFlow.CanalCloseQueryFGSAction">
+		</action>		
+		<!--渠道关闭      代理商管理系统审核    原因页面操作 -->
+		<action name="writeCanalCloseContentDLSGLAction" class="com.cqupt.canalCloseFlow.WriteCanalCloseContentDLSGLAction">
+		</action>
+
+ 
+    <!--  6渠道关闭    渠道归属审核    审核页面操作-->
+        <action name="canalGuiShuGBAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/canalCloseFlow/canalInfoSixth.jsp</result>
+		</action>
+		<action name="canalCloseQueryQDGSAction" class="com.cqupt.canalCloseFlow.CanalCloseQueryFGSAction">
+		</action>		
+		<!--渠道关闭       渠道归属审核    原因页面操作 -->
+		<action name="writeCanalCloseContentQDGSAction" class="com.cqupt.canalCloseFlow.WriteCanalCloseContentQDGSAction">
+		</action>
+
+     <!--  7渠道关闭    删除代理商网站工号审核    审核页面操作-->
+        <action name="closeAgentWebAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/canalCloseFlow/canalInfoSeventh.jsp</result>
+		</action>
+		<action name="canalCloseQuerySCWAction" class="com.cqupt.canalCloseFlow.CanalCloseQueryFGSAction">
+		</action>		
+		<!--渠道关闭         删除代理商网站工号审核    原因页面操作 -->
+		<action name="writeCanalCloseContentSCWAction" class="com.cqupt.canalCloseFlow.WriteCanalCloseContentSCWAction">
+		</action>
+
+ <!--  8渠道关闭    资金稽核编码审核    审核页面操作-->
+        <action name="closeMoneyCheckAction" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/canalCloseFlow/canalInfoEighth.jsp</result>
+		</action>
+		<action name="canalCloseQueryZJJHAction" class="com.cqupt.canalCloseFlow.CanalCloseQueryFGSAction">
+		</action>		
+		<!--渠道关闭         资金稽核编码审核    原因页面操作 -->
+		<action name="writeCanalCloseContentZJJHAction" class="com.cqupt.canalCloseFlow.WriteCanalCloseContentZJJHAction">
+		</action>
+
+     <!--  9渠道关闭    专线受理环节审核    审核页面操作-->
+        <action name="lineCloseConfig12Action" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/canalCloseFlow/canalInfoNinth.jsp</result>
+		</action>
+		<action name="canalCloseQueryZXSLAction" class="com.cqupt.canalCloseFlow.CanalCloseQueryFGSAction">
+		</action>		
+		<!--渠道关闭        专线受理环节审核    原因页面操作 -->
+		<action name="writeCanalCloseContentZXSLAction" class="com.cqupt.canalCloseFlow.WriteCanalCloseContentZXSLAction">
+		</action>
+
+    <!--  10渠道关闭    渠道基础配置审核    审核页面操作-->
+        <action name="canalConfigurationAction1" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/canalCloseFlow/canalInfoTenth.jsp</result>
+		</action>
+		<action name="canalCloseQueryJCPZAction" class="com.cqupt.canalCloseFlow.CanalCloseQueryFGSAction">
+		</action>		
+		<!--渠道关闭        渠道基础配置审核    原因页面操作 -->
+		<action name="writeCanalCloseContentJCPZAction" class="com.cqupt.canalCloseFlow.WriteCanalCloseContentJCPZAction">
+		</action>
+
+  <!--  11渠道关闭    稽核系统配置人员审核    审核页面操作-->
+        <action name="checkConfigurationAction4" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/canalCloseFlow/canalInfoEleventh.jsp</result>
+		</action>
+		<action name="canalCloseQueryJHXTAction" class="com.cqupt.canalCloseFlow.CanalCloseQueryFGSAction">
+		</action>		
+		<!--渠道关闭        稽核系统配置人员审核    原因页面操作 -->
+		<action name="writeCanalCloseContentJHXTAction" class="com.cqupt.canalCloseFlow.WriteCanalCloseContentJHXTAction">
+		</action>
+ 		<!--  12渠道关闭   财务审核    审核页面操作-->
+        <action name="caseCloseArchiveAction1" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/canalCloseFlow/canalInfoTewlveth.jsp</result>
+		</action>
+		<action name="canalCloseQueryCWSHAction" class="com.cqupt.canalCloseFlow.CanalCloseQueryFGSAction">
+		</action>
+       <!--渠道关闭         财务审核       原因页面操作 -->
+		<action name="writeCanalCloseContentCWSHAction" class="com.cqupt.canalCloseFlow.WriteCanalCloseContentCWSHAction">
+		</action>
+		<!-- 查询视图 -->
+		
+		
+		<!--  渠道管理      代理商信息显示 -->
+		<action name="agentSearch" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">/search/agentSearchList.jsp</result>
+		</action>
+		<!--  渠道管理      代理商信息显示 -->
+		<action name="searchAgent" class="com.cqupt.search.SearchAgentQueryListAction"></action>
+		<!--  渠道管理      代理商下面渠道信息显示显示 -->
+		<action name="searchAgentCanal" class="com.cqupt.search.SearchAgentCanalQueryListAction"></action>
+		<!--  渠道管理      代理商渠道下员工信息显示 -->
+		<action name="searchAgentCanalUser" class="com.cqupt.search.SearchAgentCanalUserQueryListAction"></action>
+		
+		<!--  渠道管理      渠道信息显示 -->
+		<action name="canalSearch" class="com.cqupt.sysMenu.action.WelcomeAction">
+		<result name="success">search/canalSearchList.jsp</result>
+		</action>
+		<!--  渠道管理      渠道信息显示 -->
+		<action name="searchCanal" class="com.cqupt.search.SearchCanalTypeCount"></action>
+		
+		<!--  渠道管理      渠道下员工信息显示 -->
+		<action name="searchCanalUser" class="com.cqupt.search.SearchCanalQueryListAction"></action>
+		<action name="searchCanalUserList" class="com.cqupt.search.SearchCanalUserQueryListAction"></action>
+		<!-- 工单新增流程处理详情-->
+		<action name="processDetailAction" class="com.cqupt.search.CanalProcessDetailAction"></action>
+		<!-- 工单变更流程处理详情-->
+		<action name="processDetailAction1" class="com.cqupt.search.CanalProcessDetailAction1"></action>
+				<!-- 工单关闭流程处理详情-->
+		<action name="canalCloseDealDetailQueryAAction" class="com.cqupt.search.CanalCloseDealDetailQueryAAction"></action>
+	</package>
+</struts>

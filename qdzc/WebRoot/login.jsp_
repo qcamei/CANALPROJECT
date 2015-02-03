@@ -1,0 +1,152 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>四川电信售后服务管理系统</title>
+	
+	<link href="com_css/css/login_.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="com_css/formValidator/style/validator.css" type="text/css"></link>
+	<script type="text/javascript" src="com_css/js/jquery-1.6.2.min.js"></script>
+	<script type="text/javascript" src="com_css/js/jquery.blockUI.js"></script>
+	<script type="text/javascript" src="com_css/formValidator/formValidator-4.0.1.min.js"></script>
+	<script type="text/javascript" src="com_css/formValidator/formValidatorRegex.js"></script>
+	<script type="text/javascript" src="com_css/js/loginjs.js"></script>
+<script type="text/javascript">
+
+function key_down(){
+	if (event.keyCode == 13) {
+		checkLogin();
+	}
+}
+function login() {
+	checkLogin();
+}
+
+function Preset(){
+	for(item in document.forms[0].elements){
+		if(document.forms[0][item])
+		{
+		document.forms[0][item].value = "";
+		}
+	}
+	
+}	
+</script>	
+<!-- 删除这里 -->
+<style type="text/css">
+body{
+	background:url('./images/login_/body_bg2.png') repeat-x top;		
+}
+</style>
+</head>
+
+<body bgcolor="#FBFBFB">
+
+<div align="center" >
+   <form  method="post" name="form1">
+
+   <div id="header" >
+  <img id="logo" src="./images/login_/login_header_modify_2.png"/>
+   </div>
+   <ul id="mainnav"></ul>
+   <div  id="lyout" >
+   <div class="left"><img src="./images/login_/main_lu.jpg" width="646" height="450"/></div>
+      <div class="right"  >
+          <dl class="login" >
+              <table cellspacing="0" cellpadding="0">
+                <tr>
+                     <td align="center"><img src="./images/login_/dailishang_title1.gif" ></td>
+                </tr>
+                  <tr>
+                     <td height="10" align="center"></td>
+                  </tr>
+                  <tr>
+                     <td height="100" align="center">
+                         <table  border="0" cellspacing="0" cellpadding="0">
+                            <tr height="40" >
+                               <td height="30" width="70" class="text_white b" ><font color="#EA6417">用户名：</font></td>
+                               <td width="160"><input type="text" name="userId" id="loginAction_userId"/></td>
+                            </tr>
+                            <tr>
+                                <td height="10" align="center"></td>
+                            </tr>
+                            <tr height="40">
+                                <td height="30" width="70"  class="text_white b" class="text_white b"><font style="" color="#EA6417">密&nbsp; 码：</font></td>
+                                <td ><input type="password" name="password" id="loginAction_password" /></td>
+                            </tr>
+                            <tr height="40">
+                            <td>
+                            <font style="" color="#EA6417">验证码：</font>
+                            </td>
+                            <td>
+                            	<span class="short_input">
+									<input id="loginAction_usercaptcha" type="text" style="text-transform: uppercase;width:55px;" name="usercaptcha" onkeydown="key_down()"/>
+								</span>                           
+	                            <span class="yzm" >
+									<img src="identify_Code.jsp" id="identifycode"/>
+									<a href="javascript:changeCode()">换一张</a>
+								</span>
+							</td>
+                            </tr>
+                       		 <tr>
+                            	<td height="0" colspan="2" align="center">
+                            		<div id="loginbottom" class="login" style="height:15px;">
+											<font color="#ff0000"><div id="errorInfo"><div class="warn" id="resultpsw"></div></div></font>
+									</div>
+                            	</td>
+                            	                           
+                            </tr>
+                            <tr >
+                                  <td height="30" colspan="2" align="center">
+                                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:login()" id="loginHref"><img src="./images/login_/login_button.gif" title="登录" ></a>
+                                   &nbsp;&nbsp;<a href="javascript:Preset()"><img src="./images/login_/cz.gif" title="重置"></a></td>
+                            </tr>
+                            
+                         </table>
+                         
+                  </tr>
+            </table>
+          </dl>
+ 
+            <dl class="lianjie" >
+			<table align="center" >
+			   <tr >
+			      <td height="30"><img src="./images/login_/lianjie.gif"/></td>
+			   </tr>
+			   <tr>
+                 <td >
+			     <table width="324"> 
+			       <tr height="30"> 
+			         <td width="10"> <br></td> 
+			         <td width="297"> 
+			         <br></td></tr><tr> 
+			         </tr></table>
+			         
+			         <table width="324"><tr> 
+			       			       </tr>
+			       			       <tr height="30"> 
+			         <td width="10"></td> 
+			         <td align="center"><a href="http://webmail13.189.cn/" target="_blank"><img width="85" height="27" border="0" src="./images/login_/189mail.jpg"></a></td> 
+			       			       </tr>  
+			       			       <tr height="30"> 
+			         <td width="10"></td> 
+			         <td align="center"><a href="http://elive.vnet.cn/" target="_blank"><img width="85" height="27" border="0" src="./images/login_/live.jpg"></a></td> 
+			       			       </tr> 
+			       			       <tr height="30"> 
+			         <td width="10"></td> 
+			         <td><div align="center"><a href="http://cwclient.vnet.cn/" target="_blank"><img width="85" height="27" border="0" src="./images/login_/kuandai.gif"></a></div></td> 
+			       			       </tr> 
+			       	<td width="10"></td> 
+			         <td><div align="center"><a href="http://www.vnet.cn/default.aspx" target="_blank"><img width="85" height="27" border="0" src="./images/login_/xingkong.gif"></a></div></td> 
+			       			  
+			      </table>			   </td>
+			  </tr>
+			</table> 
+		</dl>
+      </div>
+    </div>
+  </form>
+</div>
+</body>
+</html>
